@@ -1,0 +1,40 @@
+# Gone Home (Unity 2018.4.9f1, deferred 3D, NGUI menus). Produces byte-for-byte the same game
+# files as the port's own install.py (C:\Claude\Gone Home\release\gonehome\tools).
+
+steps = ["shaders", "settings", "textures", "sprites", "audio", "timing"]
+
+[game]
+name = "Gone Home"
+exe = "GoneHome.x86_64"
+data = "GoneHome_Data"
+unity_version = "2018.4.9f1"
+state_file = ".gh_install.json"
+installed_version = 2
+drop = ["GoneHome.x86", "GoneHome_Data/Mono/x86", "GoneHome_Data/Plugins/x86"]
+missing_message = """Game files not found. Copy the Linux version of Gone Home (the "GoneHome.x86_64" file and the "GoneHome_Data" folder), or the GOG Linux installer (.sh), into ports/gonehome/gamedata."""
+
+[settings]
+graphics_apis = [11, 17]
+audio_sample_rate = 44100
+texture_quality = 0            # world textures are already half size; notes must stay legible
+
+[textures]
+files = ["sharedassets*.assets", "resources.assets"]
+min_convert = 4
+block = [6, 6]
+sharp_block = [4, 4]
+sharp_block_dxt1 = [5, 5]
+# Only mipmapped world textures in the level files are scaled. NGUI atlases (pixel rects) and
+# anything with text keep their size.
+scale_files = "sharedassets*"
+scale_mipmapped_only = true
+sharp_names = 'atlas|font|text(?!ure)|letter|note|journal|postit|writing|label|ticket|postcard|gui|reticle|credits'
+mipmaps = "keep"
+
+[audio]
+stream_min_mb = 8
+adpcm = true
+
+[timing]
+fixed_timestep = 0.03333333333333333
+max_timestep = 0.2

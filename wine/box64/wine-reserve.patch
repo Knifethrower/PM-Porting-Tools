@@ -1,0 +1,28 @@
+Reserve the low 32-bit area up to just below box64's own load address (0x34800000), like
+wine-preloader does (it reserves 0x00110000-0x68000000). box64 stopped at 0x30110000, so 32-bit
+Windows programs with a fixed image base above that (Word Viewer 2003: 0x30000000-0x30881000, no
+relocations) could not be mapped: "failed to create main module ... status c0000018".
+Wine also passes WINEPRELOADRESERVE for such programs (here 0x110000 up to 0x60881000); merged into
+the low area it overlapped box64 itself, so the whole area was dropped as "not free". Cap it instead.
+--- a/src/tools/wine_tools.c
++++ b/src/tools/wine_tools.c
+@@ -24,7 +24,9 @@
+ #include "box32.h"
+ #endif
+ // only the prereseve argument is reserved, not the other zone that wine-preloader reserve
+-static wine_prereserve_t my_wine_reserve[] = {{(void*)0x00010000, 0x00008000}, {(void*)0x00110000, 0x30000000}, {(void*)0x7f000000, 0x03000000}, {0, 0}, {0, 0}};
++static wine_prereserve_t my_wine_reserve[] = {{(void*)0x00010000, 0x00008000}, {(void*)0x00110000, 0x33ef0000}, {(void*)0x7f000000, 0x03000000}, {0, 0}, {0, 0}};
++// low reserves stop here, below box64's own image (BOX64_ELF_ADDRESS 0x34800000)
++#define LOW_RESERVE_END ((void*)0x34000000)
+
+ int wine_preloaded = 0;
+
+@@ -56,6 +58,8 @@
+             if (addr+size > my_wine_reserve[idx].addr+my_wine_reserve[idx].size)
+                 // need adjust size
+                 my_wine_reserve[idx].size = (intptr_t)addr-(intptr_t)my_wine_reserve[idx].addr+size;
++            if (my_wine_reserve[idx].addr < LOW_RESERVE_END && my_wine_reserve[idx].addr+my_wine_reserve[idx].size > LOW_RESERVE_END)
++                my_wine_reserve[idx].size = (intptr_t)LOW_RESERVE_END-(intptr_t)my_wine_reserve[idx].addr;
+             return;
+         }
+         ++idx;

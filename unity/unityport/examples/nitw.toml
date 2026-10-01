@@ -1,0 +1,32 @@
+# Night in the Woods (Unity 5.6.2p4, 2D, FMOD Studio 1.09). The rules of the port's own
+# install.py (C:\Claude\Shared\templates\nitw\nightinthewoods\tools).
+
+steps = ["shaders", "settings", "textures", "sprites", "fmod"]
+
+[game]
+name = "Night in the Woods"
+exe = "NITW.x86_64"
+data = "NITW_Data"
+original_exe = "Night in the Woods.x86_64"
+original_data = "Night in the Woods_Data"
+unity_version = "5.6.2p4"
+state_file = ".nitw_install.json"
+gog_skip_x86 = false
+installed_version = 1
+missing_message = """Game files not found. Copy the Linux version of Night in the Woods (the "Night in the Woods.x86_64" file and the "Night in the Woods_Data" folder), or the GOG Linux installer (.sh), into ports/nightinthewoods/gamedata."""
+
+[settings]
+graphics_apis = [11, 17]
+audio_sample_rate = 0          # FMOD Studio does the audio: see the fmod step
+
+[textures]
+sort = "number"
+min_convert = 8
+block = [6, 6]
+sharp_block = [4, 4]
+sharp_names = 'dialogue_|text(?!ure)|letter|font|glyph'
+mipmaps = "none"               # 2D: sprites are drawn at about their own size
+
+[fmod]
+file = "resources.assets"
+sample_rate = 44100

@@ -1,0 +1,7 @@
+unity4shrink: halves large DXT1/DXT5 textures in Unity 4 asset files (used on low-memory devices).
+Built static for aarch64 (output is byte-identical to the x86_64 build):
+  aarch64-linux-gnu-gcc -O2 -static -march=armv8-a -ffp-contract=off -Wall -Wno-unused-function -s \
+    -o unity4shrink unity4shrink.c
+stb_dxt.h v1.12 by Sean Barrett (public domain / MIT), see licenses/stb_dxt.LICENSE.
+Not in this repository: stb_dxt.h (third-party). Get v1.12 from https://github.com/nothings/stb/blob/master/stb_dxt.h
+and put it next to unity4shrink.c before building.
