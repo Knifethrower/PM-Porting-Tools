@@ -16,8 +16,9 @@ Permissions: 0755 for the launcher, ELF files, files that start with '#!' and *.
 0644 for everything else (no exec list to keep up to date). Text files (by extension, plus '#!'
 scripts) get Unix line endings, except paths matching --keep-crlf. __pycache__ is skipped.
 
-usage: pm_zip.py <release dir> [out.zip] [--portdir NAME] [--keep-crlf GLOB]... [--gamedata DIR]
+usage: pm_zip.py <release dir> [out.zip] [--portdir NAME] [--keep-crlf GLOB]... [--skip GLOB]... [--gamedata DIR]
   out.zip     default: <portdir>.zip next to the release folder
+  --skip      leave matching paths out (PC-only builds kept in the release folder, e.g. '*.dll')
   --gamedata  personal builds only: DIR is added as <portdir>/gamedata/ unchanged (streamed, zip64)
 """
 import argparse, fnmatch, os, sys, time, zipfile
@@ -70,6 +71,7 @@ def main():
     ap.add_argument('out', nargs='?')
     ap.add_argument('--portdir')
     ap.add_argument('--keep-crlf', action='append', default=[], metavar='GLOB')
+    ap.add_argument('--skip', action='append', default=[], metavar='GLOB')
     ap.add_argument('--gamedata')
     a = ap.parse_args()
 
@@ -90,7 +92,8 @@ def main():
             if os.path.exists(os.path.join(rel, m)):
                 add(z, os.path.join(rel, m), f'{portdir}/{m}', a.keep_crlf)
         for p, r in walk(os.path.join(rel, portdir)):
-            add(z, p, f'{portdir}/{r}', a.keep_crlf)
+            if not any(fnmatch.fnmatch(f'{portdir}/{r}', g) for g in a.skip):
+                add(z, p, f'{portdir}/{r}', a.keep_crlf)
         if a.gamedata:                            # personal build: prepared game data included
             for p, r in walk(a.gamedata):
                 add_stream(z, p, f'{portdir}/gamedata/{r}')
