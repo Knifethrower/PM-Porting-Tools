@@ -28,7 +28,7 @@ examples are the ones the ports used, so adapt them.
 | [`gles/`](gles) | OpenGL 1.x on GLES 2 layers to compile into a game: a C one with lighting, two texture units, fog, texgen and alpha test (Bugdom 2), and a CPU-batching C++ one (Cube). |
 | [`allegro/`](allegro) | Allegro 5: a GTK-free native dialog addon stub, and an SDL-backend patch for textures that went blank after the fullscreen resize. |
 | [`machismo/`](machismo) | macOS arm64 games via [machismo](https://github.com/bmdhacks/machismo): `macsurvey` (is a Mac build a candidate), a scan for ARMv8.1+ instructions a Cortex-A53 can't run, two machismo patches, a file-read tracer. |
-| [`love/`](love) | LÖVE 0.10 games on LÖVE 11.5 (compat shim) and notes for PortMaster's love_11.5 runtime. |
+| [`love/`](love) | `fit.lua`: one `require` makes a fixed-window LÖVE 11 game fill any handheld screen (scaling, bars, mouse, pointer); LÖVE 0.10 games on 11.5 (compat shim); notes for PortMaster's love_11.5 runtime. |
 | [`re/ghidra/`](re/ghidra) | Headless Ghidra scripts: export a whole program as C, read constants. |
 
 Each folder has a README (or a header comment in each script) with usage.

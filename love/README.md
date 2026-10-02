@@ -25,20 +25,35 @@ Launchers to copy: `C:\Claude\Sienna\release\Sienna.sh` (keys via gptokeyb2),
 
 ## Filling the screen ("fit")
 
-Seven ports hand-wrote the same patch: fullscreen window, the game's fixed-size view scaled
-uniformly and centred with black bars, mouse coordinates mapped back, a drawn pointer (KMSDRM has
-no hardware cursor), switched on by a launcher variable (`ORTHO_FIT`, `SB_FIT`, `TP_FIT`,
-`TROSH_FIT`, `IYFCT_FIT`, `SIENNA_FIT`, `DUCK_FIT`). Copy the closest one:
-- `C:\Claude\Orthorobot\tools-src\ortho_port.py`: the most complete (view transform, mouse
-  helpers, drawn pointer).
-- `C:\Claude\Safety Blanket\tools-src\safetyblanket_port.py`: games that draw into their own canvas
-  and scale it.
-- `C:\Claude\IYFCT\tools-src\0001-fit-to-screen.patch`, `C:\Claude\Sienna\tools-src\0001-handheld-fit-and-confirm.patch`:
-  scissor to the game area.
+**`fit.lua`** (2026-10-02): one line at the top of `main.lua`, before any compat shim, and
+`export PM_FIT=1` in the launcher:
 
-A generic drop-in `fit.lua` was started and parked unfinished (not included): a transform-based
-version broke games that set their scale while a canvas is active (Safety Blanket); the
-render-to-canvas version still trips LÖVE's "no canvas active during present/event.pump" rules.
+```lua
+require("fit").setup(1024, 768, {pointer = true})   -- W x H = the size the game draws at
+```
+
+Fullscreen window; everything the game draws to "the screen" goes into a W x H canvas that is
+scaled uniformly and centred (black bars, or `bars = "game"` for its background colour; `integer`
+for whole-number scales); mouse/touch coordinates, `getDimensions`, `getMode`,
+`getDesktopDimensions` and `setMode` are translated so the game sees its own window size; `pointer`
+draws an arrow (KMSDRM has no hardware cursor). Games with the mouse module switched off work too.
+Options and limits in the file's header.
+
+Tested on the PC (LÖVE 11.5, Xvfb at 640x480, 720x720, 960x544, 1280x720): a test game (canvas,
+scissor, mouse events, setMode) and three real games against their hand-written fits: Safety Blanket
+(draws into its own canvas and scales it), Orthorobot (0.10 compat shim, own mouse helpers; a
+click on its menu works), IYFCT (3:1 strip, no mouse module). Matched within the games' own
+animation. Not yet run on a device.
+
+Lessons from writing it: transforming the game's drawing instead (origin/scissor hooks) breaks
+games that set their scale while a canvas is active; LÖVE refuses `present()` and
+`event.pump()` while any canvas is active, so the stand-in canvas is selected at each frame's
+`origin()`; `getMode()`'s flags carry the windowed x/y, which offset the fullscreen window on X;
+draw `present()`'s blit with the original `setColor`, the 0.10 shim's 0-255 one made it black.
+
+The seven earlier ports keep their hand-written versions (`ORTHO_FIT`, `SB_FIT`, `TP_FIT`,
+`TROSH_FIT`, `IYFCT_FIT`, `SIENNA_FIT`, `DUCK_FIT` in the launchers), which work on the RG Cube XX:
+`C:\Claude\Orthorobot\tools-src\ortho_port.py` is the most complete of them.
 
 TROSH (LÖVE 0.8) needed more than the 0.10 shim: `drawq`, `setDefaultImageFilter`, `setIcon`,
 `getMode`/`setMode`, `getColor` in 0-255, `newSource` type, `math.mod`
