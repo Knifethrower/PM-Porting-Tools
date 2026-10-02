@@ -13,6 +13,9 @@ has its own `LICENSE` file.
 | `shim/xstub/` | MIT | shipped that way in the Ittle Dew port |
 | `box64/`, `wine/box64/` | MIT | patches to [box64](https://github.com/ptitSeb/box64) |
 | `devtools/pc-testing/gl4es-mali/` | MIT | patches to [gl4es](https://github.com/ptitSeb/gl4es) (`test_world.sh` there is 0BSD) |
+| `gles/gl1es-cube/` | zlib | published that way with Cube in Knifethrower/cube-pm |
+| `allegro/` | zlib | like [Allegro](https://github.com/liballeg/allegro5), which the patch and the stub belong to |
+| `machismo/patches/` | GPLv3 | patches to [machismo](https://github.com/bmdhacks/machismo) |
 
 `shim/sysvsem/` and `devtools/profiling/fpslog/` say 0BSD in their own headers, matching the rest.
 

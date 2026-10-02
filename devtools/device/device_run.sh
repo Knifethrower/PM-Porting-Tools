@@ -17,7 +17,8 @@ if [ -x /etc/init.d/S31emulationstation ]; then
 else
   for s in emulationstation essway; do systemctl is-active -q $s 2>/dev/null && { FE_STOP=${FE_STOP:-"systemctl stop $s"}; FE_START=${FE_START:-"systemctl start $s"}; }; done
 fi
-pids() { for p in /proc/[0-9]*; do [ "$(cat $p/comm 2>/dev/null)" = "$1" ] && echo "${p#/proc/}"; done; }
+# comm holds only the first 15 characters of the name
+pids() { for p in /proc/[0-9]*; do [ "$(cat $p/comm 2>/dev/null)" = "${1:0:15}" ] && echo "${p#/proc/}"; done; }
 case "$1" in
 start)
   [ -f "$PORTS/$2" ] || { echo "no launcher $PORTS/$2"; exit 1; }

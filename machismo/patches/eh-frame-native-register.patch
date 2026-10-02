@@ -1,0 +1,19 @@
+diff --git a/src/eh_frame.c b/src/eh_frame.c
+index ce7746c..3996131 100644
+--- a/src/eh_frame.c
++++ b/src/eh_frame.c
+@@ -1174,7 +1174,13 @@ int eh_frame_register_macho(void* mh, uintptr_t slide)
+ 			reg_frame(ehf_buf);
+ 			fprintf(stderr, "eh_frame: registered %d synthetic FDEs via __register_frame\n",
+ 			        fdes_emitted);
+-			if (native_eh_frame && native_eh_frame_size > 0) {
++			/* The native section has no zero terminator; GCC 13+ libgcc parses registered
++			 * tables eagerly and runs off its end. Where the _dl_find_object hook exists it
++			 * serves the native FDEs from the merged .eh_frame_hdr, so register only without it. */
++			if (native_eh_frame && native_eh_frame_size > 0 &&
++			    dlsym(RTLD_NEXT, "_dl_find_object")) {
++				fprintf(stderr, "eh_frame: native __eh_frame left to the _dl_find_object hook\n");
++			} else if (native_eh_frame && native_eh_frame_size > 0) {
+ 				reg_frame(native_eh_frame);
+ 				fprintf(stderr, "eh_frame: registered native __eh_frame (%zu bytes) via __register_frame\n",
+ 				        native_eh_frame_size);

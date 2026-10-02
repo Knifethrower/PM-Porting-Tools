@@ -1,10 +1,10 @@
 // LD_PRELOAD probe for PC testing (not part of the port).
-// - Counts glBegin / glVertex3f / glCallList / glDrawArrays per frame and the drawing time (from
+// - Counts glBegin / glVertex3f / glCallList / glDrawArrays / glDrawElements per frame and the drawing time (from
 //   the frame's glClear to the end of SDL_GL_SwapWindow), printed as averages every 300 frames.
 //   The gl4es build calls libGL directly (symbol interposition below); the native GLES build gets
 //   its entry points from SDL_GL_GetProcAddress, which is hooked to hand out counting wrappers.
 // - FAKECLOCK=1: SDL_GetTicks advances exactly 16 ms per swapped frame, SDL_Delay does nothing
-//   and the wall clock is frozen, so the game runs one logic step per frame with fixed random
+//   and the wall clock (CLOCK_REALTIME, time()) is frozen, so the game runs one logic step per frame with fixed random
 //   seeds: two builds replaying the same replay draw identical frames.
 // - KEYS="29:30-35 82:40-9000 ...": with FAKECLOCK, the keyboard state holds each SDL scancode
 //   down over its frame range (Z 29, X 27, Up 82, Down 81, Left 80, Right 79, P 19, Esc 41).
@@ -20,7 +20,7 @@
 #include <string.h>
 #include <time.h>
 
-static long nbegin, ncall, ndraw, nvert, frames;
+static long nbegin, ncall, ndraw, nelem, nvert, frames;
 static double tsum, tmax, tclear;
 
 #define NEXT(ret, name, args) static ret (*real_##name) args; \
@@ -34,6 +34,14 @@ int clock_gettime(clockid_t id, struct timespec *ts) {
     return 0;
   }
   return real_clock_gettime(id, ts);
+}
+
+time_t time(time_t *t) {
+  NEXT(time_t, time, (time_t *));
+  if (!getenv("FAKECLOCK"))
+    return real_time(t);
+  if (t) *t = 1700000000;
+  return 1700000000;
 }
 
 static double now(void) {
@@ -85,13 +93,16 @@ void glBegin(unsigned mode) { NEXT(void, glBegin, (unsigned)); nbegin++; real_gl
 void glVertex3f(float x, float y, float z) { NEXT(void, glVertex3f, (float, float, float)); nvert++; real_glVertex3f(x, y, z); }
 void glCallList(unsigned l) { NEXT(void, glCallList, (unsigned)); ncall++; real_glCallList(l); }
 void glDrawArrays(unsigned m, int f, int c) { NEXT(void, glDrawArrays, (unsigned, int, int)); ndraw++; real_glDrawArrays(m, f, c); }
+void glDrawElements(unsigned m, int c, unsigned t, const void *i) { NEXT(void, glDrawElements, (unsigned, int, unsigned, const void *)); nelem++; real_glDrawElements(m, c, t, i); }
 void glClear(unsigned m) { NEXT(void, glClear, (unsigned)); tclear = now(); real_glClear(m); }
 
 // Native GLES build: entry points come from SDL_GL_GetProcAddress.
 static void *(*real_SDL_GL_GetProcAddress)(const char *);
 static void (*gles_glDrawArrays)(unsigned, int, int);
+static void (*gles_glDrawElements)(unsigned, int, unsigned, const void *);
 static void (*gles_glClear)(unsigned);
 static void counting_glDrawArrays(unsigned m, int f, int c) { ndraw++; gles_glDrawArrays(m, f, c); }
+static void counting_glDrawElements(unsigned m, int c, unsigned t, const void *i) { nelem++; gles_glDrawElements(m, c, t, i); }
 static void counting_glClear(unsigned m) { tclear = now(); gles_glClear(m); }
 
 static void *realProc(const char *name) {
@@ -105,6 +116,7 @@ void *SDL_GL_GetProcAddress(const char *name) {
   if (!real)
     return real;
   if (!strcmp(name, "glDrawArrays")) { gles_glDrawArrays = (void (*)(unsigned, int, int)) real; return (void *) counting_glDrawArrays; }
+  if (!strcmp(name, "glDrawElements")) { gles_glDrawElements = (void (*)(unsigned, int, unsigned, const void *)) real; return (void *) counting_glDrawElements; }
   if (!strcmp(name, "glClear")) { gles_glClear = (void (*)(unsigned)) real; return (void *) counting_glClear; }
   return real;
 }
@@ -165,8 +177,8 @@ void SDL_GL_SwapWindow(void *w) {
   }
   double d = now() - tclear; tsum += d; if (d > tmax) tmax = d;
   if (++frames % 300 == 0) {
-    fprintf(stderr, "GLCOUNT per frame: glBegin %ld, glVertex3f %ld, glCallList %ld, glDrawArrays %ld; draw %.2f ms avg, %.2f max\n",
-            nbegin / 300, nvert / 300, ncall / 300, ndraw / 300, tsum / 300 * 1000, tmax * 1000);
-    nbegin = ncall = ndraw = nvert = 0; tsum = tmax = 0;
+    fprintf(stderr, "GLCOUNT per frame: glBegin %ld, glVertex3f %ld, glCallList %ld, glDrawArrays %ld, glDrawElements %ld; draw %.2f ms avg, %.2f max\n",
+            nbegin / 300, nvert / 300, ncall / 300, ndraw / 300, nelem / 300, tsum / 300 * 1000, tmax * 1000);
+    nbegin = ncall = ndraw = nelem = nvert = 0; tsum = tmax = 0;
   }
 }

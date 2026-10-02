@@ -12,6 +12,10 @@ usage: uinput_keys.py <spec> ...
 key names: a-z, 0-9, enter, esc, space, tab, backspace, up, down, left, right, lshift, rshift,
   lctrl, rctrl, lalt, ralt, f1-f12, pageup, pagedown, home, end, minus, equal, comma, dot, slash
 UINPUT_SETTLE (default 2): seconds to wait after creating the device so Weston/Xwayland/SDL pick it up.
+UINPUT_FIFO=<path>: after the specs, keep the device and run spec lines written to that FIFO
+  (created if missing) until a line "quit": create the keyboard before the game starts (SDL on
+  KMSDRM may not see a keyboard plugged in later), then step through it with screenshots:
+  UINPUT_FIFO=/tmp/keys.fifo uinput_keys.py wait:1:0 &  ...  echo "z:1:1 down:2:0.3" > /tmp/keys.fifo
 From Ittle Dew (pctest/cube_uinput.py). License: 0BSD.
 """
 import fcntl, os, struct, sys, time
@@ -34,17 +38,27 @@ EV_SYN, EV_KEY = 0, 1
 
 if len(sys.argv) < 2:
     sys.exit(__doc__)
-specs = []
-for arg in sys.argv[1:]:                       # parse everything first: no half-run on a typo
-    parts = arg.split(':')
-    if len(parts) < 3:
-        sys.exit(f'bad spec {arg!r}')
-    keys = parts[0]
-    if keys != 'wait':
-        unknown = [k for k in keys.split('+') if k not in KEYS]
-        if unknown:
-            sys.exit(f'unknown key(s) {unknown}')
-    specs.append((keys, int(parts[1]), float(parts[2]), float(parts[3]) if len(parts) > 3 else 0.08))
+
+
+def parse(args):                               # parse everything first: no half-run on a typo
+    specs = []
+    for arg in args:
+        parts = arg.split(':')
+        if len(parts) < 3:
+            raise ValueError(f'bad spec {arg!r}')
+        keys = parts[0]
+        if keys != 'wait':
+            unknown = [k for k in keys.split('+') if k not in KEYS]
+            if unknown:
+                raise ValueError(f'unknown key(s) {unknown}')
+        specs.append((keys, int(parts[1]), float(parts[2]), float(parts[3]) if len(parts) > 3 else 0.08))
+    return specs
+
+
+try:
+    specs = parse(sys.argv[1:])
+except ValueError as e:
+    sys.exit(str(e))
 
 fd = os.open('/dev/uinput', os.O_WRONLY | os.O_NONBLOCK)
 fcntl.ioctl(fd, UI_SET_EVBIT, EV_KEY)
@@ -61,7 +75,7 @@ def emit(t, c, v):
     os.write(fd, struct.pack('llHHi', 0, 0, t, c, v))
 
 
-try:
+def run(specs):
     for keys, count, interval, hold in specs:
         if keys == 'wait':
             time.sleep(interval)
@@ -76,6 +90,25 @@ try:
                 emit(EV_KEY, c, 0)
             emit(EV_SYN, 0, 0)
             time.sleep(interval)
+
+
+try:
+    run(specs)
+    fifo = os.environ.get('UINPUT_FIFO')
+    if fifo:
+        if not os.path.exists(fifo):
+            os.mkfifo(fifo)
+        done = False
+        while not done:
+            with open(fifo) as f:
+                for line in f:
+                    if line.strip() == 'quit':
+                        done = True
+                        break
+                    try:
+                        run(parse(line.split()))
+                    except ValueError as e:
+                        print(e, flush=True)
     time.sleep(0.3)
 finally:
     fcntl.ioctl(fd, UI_DEV_DESTROY)

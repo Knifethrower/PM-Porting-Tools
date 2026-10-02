@@ -1,0 +1,98 @@
+diff --git a/src/isa_emul.c b/src/isa_emul.c
+index 92b3325..41e0f36 100644
+--- a/src/isa_emul.c
++++ b/src/isa_emul.c
+@@ -7,7 +7,7 @@
+  * Supported instruction families:
+  *   LSE atomics (ARMv8.1): LDADD, LDCLR, LDEOR, LDSET, SWP, CAS,
+  *     LDSMAX, LDSMIN, LDUMAX, LDUMIN (and ST variants when Rt=XZR)
+- *   SHA3 (ARMv8.2): BCAX
++ *   SHA3 (ARMv8.2): BCAX, EOR3
+  */
+ 
+ #include "isa_emul.h"
+@@ -442,6 +442,59 @@ static int emit_bcax_island(int vd, int vn, int vm, int va,
+ 	return n;
+ }
+ 
++/* --- ARMv8.2 SHA3: EOR3 emulation ---
++ *
++ * EOR3 Vd.16B, Vn.16B, Vm.16B, Va.16B
++ *   Vd = Vn XOR Vm XOR Va
++ *
++ * Encoding: 0xCE000000 | Vm[20:16] | Va[14:10] | Vn[9:5] | Vd[4:0]
++ * Mask:     0xFFE08000 == 0xCE000000
++ *
++ * Two NEON EORs, ordered so no source is overwritten before it is read:
++ *   Va != Vd:            EOR Vd, Vn, Vm ; EOR Vd, Vd, Va
++ *   Va == Vd, Vm != Vd:  EOR Vd, Vd, Vn ; EOR Vd, Vd, Vm
++ *   Va == Vm == Vd:      Vd = Vn (the other two cancel): ORR Vd, Vn, Vn
++ * (Clang emits it for 64-bit xorshift PRNGs such as LuaJIT's lj_prng_u64.)
++ */
++
++/* NEON ORR Vd.16B, Vn.16B, Vm.16B: 0x4EA01C00 | Rm<<16 | Rn<<5 | Rd */
++static inline uint32_t enc_neon_orr(int vd, int vn, int vm)
++{
++	return 0x4EA01C00 | (vm << 16) | (vn << 5) | vd;
++}
++
++static int decode_eor3(uint32_t instr, int *vd, int *vn, int *vm, int *va)
++{
++	if ((instr & 0xFFE08000) != 0xCE000000)
++		return 0;
++	*vd = instr & 0x1F;
++	*vn = (instr >> 5) & 0x1F;
++	*va = (instr >> 10) & 0x1F;
++	*vm = (instr >> 16) & 0x1F;
++	return 1;
++}
++
++/* Emit EOR3 island (at most 3 words). Returns number of words written. */
++static int emit_eor3_island(int vd, int vn, int vm, int va,
++                            uint32_t *island, uint32_t *orig_addr)
++{
++	int n = 0;
++
++	if (va != vd) {
++		island[n++] = enc_neon_eor(vd, vn, vm);
++		island[n++] = enc_neon_eor(vd, vd, va);
++	} else if (vm != vd) {
++		island[n++] = enc_neon_eor(vd, vd, vn);
++		island[n++] = enc_neon_eor(vd, vd, vm);
++	} else {
++		island[n++] = enc_neon_orr(vd, vn, vn);
++	}
++
++	int32_t off = (int32_t)(orig_addr + 1 - &island[n]);
++	island[n++] = enc_b(off);
++	return n;
++}
++
+ int isa_emul_patch(uint32_t *code, size_t code_size,
+                    uint32_t **pool_ptr, uint32_t *pool_end)
+ {
+@@ -490,6 +543,24 @@ int isa_emul_patch(uint32_t *code, size_t code_size,
+ 			patched++;
+ 			continue;
+ 		}
++
++		/* Try EOR3 (SHA3) */
++		if (decode_eor3(code[i], &vd, &vn, &vm, &va)) {
++			if (island + 3 > pool_end) {
++				fprintf(stderr, "isa_emul: island pool exhausted after %d patches\n", patched);
++				break;
++			}
++			int64_t offset = (int64_t)(island - &code[i]);
++			if (offset > 0x01FFFFFF || offset < -0x02000000) {
++				fprintf(stderr, "isa_emul: island out of B range at %p\n", (void*)&code[i]);
++				continue;
++			}
++			int words = emit_eor3_island(vd, vn, vm, va, island, &code[i]);
++			code[i] = enc_b((int32_t)(island - &code[i]));
++			island += words;
++			patched++;
++			continue;
++		}
+ 	}
+ 
+ 	*pool_ptr = island;

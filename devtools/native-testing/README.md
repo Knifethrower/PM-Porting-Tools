@@ -10,6 +10,11 @@ ImageMagick, and an arm64 sysroot (`../../build/native-aarch64`).
 | `arm_replay_compare.sh <port folder> <binary> <outdir>` | Same for the aarch64 release binary inside the arm64 chroot (as root). Slow: few frames. |
 | `compare_frames.sh <A> <B> <out>` | Pixel diff of two dump folders; side-by-side PNG for every frame that differs. |
 | `aspect_test.sh <binary> <shots> [WxH...]` | One contact sheet per handheld screen size (Hor+/Vert+ and HUD anchoring, knowledge §19). |
+| `contact_sheet.sh <frames dir> [out.jpg]` | Every frame dump of one run on a labelled sheet (Bugdom 2). |
+
+FAKECLOCK freezes CLOCK_REALTIME and `time()`: games that time frames with std::chrono
+(libstdc++ `high_resolution_clock` = realtime) see zero deltas, and those seeding from `time()` get a fixed
+seed (Bugdom 2, `C:\Claude\Bugdom 2\pctest`). The probe also counts `glDrawElements`.
 
 Build the probe once: `gcc -O2 -shared -fPIC -o ~/glcount.so ../profiling/device-sampler/glcount.c -ldl`.
 KEYS uses SDL scancodes, `"code:from-to ..."` in frames (Z 29, X 27, Enter 40, arrows R79 L80 D81 U82).

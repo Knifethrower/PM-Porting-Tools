@@ -19,6 +19,7 @@ export DEV_HOST=root@<device ip> DEV_SOCK=/tmp/device.sock
 | `fbshot.sh <out.png>` | PC | Screenshot from `/dev/fb0` (size/depth from sysfs), converted in WSL. Not yet run on a device in this generic form (Ittle Dew's 720x720 BGRA version worked on the Cube XX). |
 | `thread_sample.sh <process>` | device | Busiest threads, their state and kernel wait channel, page faults, free memory: hangs and stalls without gdb. |
 | `smaps_summary.py <pid>` | device | Rss per mapping (game files, heap, anon, libraries). |
+| `install_smb.py <share ports folder> <zip> [<game files> <subfolder>]` | PC (Windows) | Unpacks the port zip (and the user's game files) onto the device's SMB share, checks sizes and the MD5 of executables and libraries. From Tummy Bonbons. |
 | `examples/` | | Complete sessions from finished ports: Cube's map-tour benchmark, Ittle Dew's step-by-step driving session (keys, screenshot, fps per step), Stunt Playground's copy-run-fetch screenshot. |
 
 Profiling on the device: `../profiling/device-sampler/`; box64 games: `../profiling/fpslog/`.
