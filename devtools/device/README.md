@@ -1,7 +1,7 @@
 # Testing on the handheld
 
 No passwords or keys: the user opens one shared SSH connection per boot, and everything goes
-through it (knowledge §16.14). Ask before starting or stopping anything on a device the user also
+through it. Ask before starting or stopping anything on a device the user also
 plays on. Run test copies from `/tmp` (RAM); the data partition on Knulli is exFAT/FUSE.
 
 ```bash

@@ -27,5 +27,5 @@ libc handle, so only an x86 preload is seen by the game.
 3. Test on the PC with the real game: `LD_PRELOAD=./libsysvsem.so SYSVSEM_FORCE=1 ./Game.x86_64` must play
    normally; on the device the player gets past Mono init (input, GL init, `Initialize engine version`).
 
-First used by Ittle Dew, verified on the RG Cube XX (Knulli). Knowledge doc §16.16.
+First used by Ittle Dew, verified on the RG Cube XX (Knulli).
 License: 0BSD (LICENSE.txt).

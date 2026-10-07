@@ -16,5 +16,5 @@ Tips from the two ports:
 - Syscall trace of the dylib/library opens under qemu: `QEMU_STRACE=1` (Spaghetti Celesti
   `pctest/trace_dlopen.sh`).
 - Run the binary by its absolute path (Tummy Bonbons looked up its resources relative to argv[0]).
-- LuaJIT inside the game may need a trampoline (Tummy Bonbons, see its notes).
+- LuaJIT inside the game may need a trampoline (Tummy Bonbons).
 - Clone Linux reference ports with `core.autocrlf=false`: CRLF broke `dylib_map` paths.

@@ -1,7 +1,7 @@
 # OpenGL 1.x on GLES 2: native layers to copy
 
 Games with source that draw with fixed-function OpenGL get a native GLES 2 layer compiled into the
-game, never gl4es (knowledge §1). Both layers take the game's `gl*` calls (macros rename them to
+game, never gl4es. Both layers take the game's `gl*` calls (macros rename them to
 `gl1_*`), load the ES 2.0 entry points with `SDL_GL_GetProcAddress` (no GL library linked or
 bundled) and generate shaders for the fixed-function state. Copy the one closer to the game and cut
 or extend it to the subset the game actually uses; unsupported calls log once (`UNSUPPORTED`).

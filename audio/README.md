@@ -5,7 +5,7 @@
 Old OGG files (encoded before libvorbis 1.0, 2001 and earlier) use **residue type 0**. SDL_mixer
 2.8 on the CFWs (Knulli confirmed) decodes OGG with its bundled stb_vorbis, whose type-0 path drops
 every partition after the first: music plays muffled, "like the wrong sample rate", while the PC
-(SDL_mixer with libvorbisfile) sounds right. Knowledge §18 and `notes/TORUS-TROOPER-PORT-NOTES.md`.
+(SDL_mixer with libvorbisfile) sounds right.
 
 - `vorbis_setup.py file.ogg`: prints the setup header (codebooks, floors, residues, mappings). A
   residue with `type 0` means the file needs repacking.

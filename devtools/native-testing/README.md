@@ -9,7 +9,7 @@ ImageMagick, and an arm64 sysroot (`../../build/native-aarch64`).
 | `replay_compare.sh <binary> <outdir>` | Runs an x86_64 build on Xvfb with the glcount probe (`../profiling/device-sampler/glcount.c`) in FAKECLOCK mode with scripted KEYS: every run draws the same frames; dumps the frames in FRAMES. `GL4ES=<dir>` runs through a Mali-profile gl4es instead of Mesa GLES. |
 | `arm_replay_compare.sh <port folder> <binary> <outdir>` | Same for the aarch64 release binary inside the arm64 chroot (as root). Slow: few frames. |
 | `compare_frames.sh <A> <B> <out>` | Pixel diff of two dump folders; side-by-side PNG for every frame that differs. |
-| `aspect_test.sh <binary> <shots> [WxH...]` | One contact sheet per handheld screen size (Hor+/Vert+ and HUD anchoring, knowledge §19). |
+| `aspect_test.sh <binary> <shots> [WxH...]` | One contact sheet per handheld screen size (Hor+/Vert+ and HUD anchoring). |
 | `contact_sheet.sh <frames dir> [out.jpg]` | Every frame dump of one run on a labelled sheet (Bugdom 2). |
 
 FAKECLOCK freezes CLOCK_REALTIME and `time()`: games that time frames with std::chrono

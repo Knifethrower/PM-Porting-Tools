@@ -49,7 +49,7 @@ def run(gamedir, data=None):
     for p in exes:
         print(f'executable: {os.path.basename(p)} ({elf_arch(p)})')
     if not any(p.endswith('.x86_64') for p in exes):
-        notes.append('no Linux x86_64 player: Windows-only game, see knowledge section 13.1 (donor Linux player)')
+        notes.append('no Linux x86_64 player: Windows-only game: needs a donor Linux player of the same Unity version')
     if os.path.exists(os.path.join(gamedir, 'UnityPlayer.so')):
         print('UnityPlayer.so: yes (Unity 2017.2+ split player)')
     il2cpp = os.path.exists(os.path.join(gamedir, 'GameAssembly.so')) or os.path.isdir(os.path.join(d, 'il2cpp_data'))
@@ -59,7 +59,7 @@ def run(gamedir, data=None):
         print('native plugins: ' + ', '.join(plugins))
     if any('fmodstudio' in p.lower() for p in plugins):
         steps.append('fmod')
-        notes.append('FMOD Studio integration: add the fmod step (44100 Hz mixing, knowledge section 12)')
+        notes.append('FMOD Studio integration: add the fmod step (44100 Hz mixing)')
     if any('steam' in p.lower() for p in plugins):
         notes.append('Steamworks plugin: may need a stub (patching/steamstub)')
     if any('wwise' in p.lower() or 'akso' in p.lower() for p in plugins):
@@ -86,7 +86,7 @@ def run(gamedir, data=None):
             if mx < 0.1:
                 steps.append('timing')
                 notes.append(f'maximum timestep {mx:.3f} s: below {1 / mx:.0f} FPS the game runs in slow '
-                             'motion (subtitles lag the audio); consider the timing step (knowledge section 12.1)')
+                             'motion (subtitles lag the audio); consider the timing step')
         elif n == 'QualitySettings':
             t = o.read_typetree()
             names = [q['name'] for q in t['m_QualitySettings']]

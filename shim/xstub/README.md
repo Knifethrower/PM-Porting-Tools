@@ -13,7 +13,7 @@ flat, +21..34 MB free in the world, input from evdev.
 Not shipped with Ittle Dew (too little gain for a 900-line replacement of a tested library); kept for a port
 where Weston + Xwayland is the difference between fitting and not fitting.
 
-What the player needs (learned the hard way, details in the Ittle Dew notes, section "X11 stub"):
+What the player needs (learned the hard way on Ittle Dew):
 - box64's libX11 wrapper dereferences `_XLockMutex_fn` / `_XUnlockMutex_fn` at load and reads `struct _XDisplay`
   fields: keep the real Xlib struct layouts.
 - crusty initialises gl4es only with `CRUSTY_GL4ES=1` (westonwrap sets it; without it the first glClear crashes).

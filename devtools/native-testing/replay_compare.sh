@@ -11,7 +11,7 @@
 #   RES=WxH   screen size (default 640x480)          XDISP  Xvfb display (default 96)
 #   CLEAN     files to delete in the run folder first (saved scores change the title screen)
 #   ARGS      arguments for the game                 TIMEOUT  seconds to wait (default 240)
-#   GL4ES=dir run through an x86_64 gl4es build in dir (Mali profile, knowledge §16.3) instead of
+#   GL4ES=dir run through an x86_64 gl4es build in dir (Mali profile) instead of
 #             SDL's own Mesa GLES path
 #   EXTRA_PRELOAD  more preloads after the probe
 # From Torus Trooper and Mu-cade (pctest/).

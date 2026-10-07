@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a PortMaster port zip from a release folder.
 
-Release folder (the layout every port in C:\\Claude uses):
+Release folder (the layout all the author's ports use):
   <release>/<Port Name>.sh          the launcher (exactly one .sh at the top)
   <release>/port.json, README.md, gameinfo.xml, screenshot.png, cover.png
                                     (whichever exist; they go into the port folder in the zip;

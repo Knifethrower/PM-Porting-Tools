@@ -2,7 +2,7 @@
 # usage: aspect_test.sh <binary> <shots dir> [WxH ...]
 # Renders the game at every handheld screen size (replay_compare.sh with RES) and puts each size's
 # frames into one contact sheet <shots dir>/aspect_<W>x<H>.png, to check Hor+/Vert+ and HUD
-# anchoring (knowledge §19). Default sizes: 640x480 720x720 480x320 1280x720 854x480 960x544
+# anchoring. Default sizes: 640x480 720x720 480x320 1280x720 854x480 960x544
 # 800x480 1024x768. Needs ImageMagick (montage).
 #   FRAMES  frames per size (default "60 250 600 1000"); KEYS  scripted input (default: Z at 60)
 #   WORK    where the raw dumps go (default /tmp/aspect); other replay_compare.sh variables pass through

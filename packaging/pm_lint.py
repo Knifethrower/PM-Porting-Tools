@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check a port's release folder (or its zip) against the PortMaster packaging rules.
 
-Rules from portmaster-ai-complete-reference.md (C:\\Claude) and PortMaster-New's AGENTS.md: port.json v4
+Rules from PortMaster-New's contribution docs (AGENTS.md and the packaging guide): port.json v4
 fields, the launcher's boilerplate header and banned patterns, folder naming, licenses, README
 shape, gameinfo.xml paths, screenshot/cover size, LF line endings, no em dashes. Started as Space
 Trader's package_port.py checks.
