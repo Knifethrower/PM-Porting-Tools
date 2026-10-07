@@ -1,0 +1,55 @@
+diff -ruN a/Makefile.gmloader b/Makefile.gmloader
+--- a/Makefile.gmloader	2026-10-03 16:06:14.806073902 -0400
++++ b/Makefile.gmloader	2026-10-05 19:55:57.021646406 -0400
+@@ -62,6 +62,12 @@
+ 	-include 3rdparty/FMOD_SDL.mk
+ endif
+ 
++ifeq (${USE_OPENAL_THUNKS},1)
++	CFLAGS+=-DUSE_OPENAL_THUNKS=1
++	CXXFLAGS+=-DUSE_OPENAL_THUNKS=1
++	LIBS+=$(shell ${PKG_CONFIG} openal --libs)
++endif
++
+ ifeq (${USE_LUA},1)
+ 	CFLAGS+=-DUSE_LUA=1
+ 	-include 3rdparty/lua.mk
+diff -ruN a/gmloader/main.cpp b/gmloader/main.cpp
+--- a/gmloader/main.cpp	2026-10-03 16:06:14.810073850 -0400
++++ b/gmloader/main.cpp	2026-10-05 19:55:57.021646406 -0400
+@@ -42,6 +42,9 @@
+ extern DynLibFunction symtable_libc[];
+ extern DynLibFunction symtable_zlib[];
+ extern DynLibFunction symtable_gles2[];
++#ifdef USE_OPENAL_THUNKS
++extern DynLibFunction symtable_openal[];
++#endif
+ 
+ extern double FORCE_PLATFORM;
+ 
+@@ -53,6 +56,9 @@
+     symtable_libc,
+     symtable_zlib,
+     symtable_gles2,
++#ifdef USE_OPENAL_THUNKS
++    symtable_openal,
++#endif
+     NULL
+ };
+ 
+diff -ruN a/loader/so_util.cpp b/loader/so_util.cpp
+--- a/loader/so_util.cpp	2026-10-03 16:06:14.810073850 -0400
++++ b/loader/so_util.cpp	2026-10-05 19:55:57.021646406 -0400
+@@ -328,7 +328,11 @@
+         filename.starts_with("libdl.so") ||
+         filename.starts_with("liblog.so") ||
+         filename.starts_with("libandroid.so") ||
+-        filename.starts_with("libz.so"))
++        filename.starts_with("libz.so")
++#ifdef USE_OPENAL_THUNKS
++        || filename.starts_with("libopenal.so")
++#endif
++        )
+       return true;
+     return false;
+ }

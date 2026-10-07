@@ -1,0 +1,33 @@
+diff -ruN a/gmloader/libyoyo.cpp b/gmloader/libyoyo.cpp
+--- a/gmloader/libyoyo.cpp	2026-10-03 16:06:14.810073850 -0400
++++ b/gmloader/libyoyo.cpp	2026-10-05 19:55:57.521638679 -0400
+@@ -423,6 +423,7 @@
+     Function_Add("video_open", video_open_reimpl, 1, 1);
+     #endif
+     Function_Add("game_change", game_change_reimpl, 2, 0);
++    register_spritehack_functs(mod);
+ 
+     so_symbol_fix_ldmia(mod, "_Z11Shader_LoadPhjS_");
+ }
+diff -ruN a/gmloader/libyoyo.h b/gmloader/libyoyo.h
+--- a/gmloader/libyoyo.h	2026-10-03 16:06:14.810073850 -0400
++++ b/gmloader/libyoyo.h	2026-10-05 19:55:57.521638679 -0400
+@@ -363,3 +363,7 @@
+ 
+ extern "C" fct_add_t Original_Function_Add;
+ void Function_Add_Hook(const char* f_name, routine_t func, int argc, char reg);
++
++/* spritehack.cpp */
++void register_spritehack_functs(so_module *mod);
++void spritehack_end_step();
+diff -ruN a/gmloader/main.cpp b/gmloader/main.cpp
+--- a/gmloader/main.cpp	2026-10-03 16:06:14.810073850 -0400
++++ b/gmloader/main.cpp	2026-10-05 19:55:57.521638679 -0400
+@@ -262,6 +262,7 @@
+         #ifdef VIDEO_SUPPORT
+         video_process();
+         #endif
++        spritehack_end_step();
+         if (update_inputs(sdl_win) != 1)
+             break;
+         SDL_GetWindowSize(sdl_win, &w, &h);

@@ -16,8 +16,13 @@ has its own `LICENSE` file.
 | `gles/gl1es-cube/` | zlib | published that way with Cube in Knifethrower/cube-pm |
 | `allegro/` | zlib | like [Allegro](https://github.com/liballeg/allegro5), which the patch and the stub belong to |
 | `machismo/patches/` | GPLv3 | patches to [machismo](https://github.com/bmdhacks/machismo) |
+| `gamemaker/gmloader-next/` (the patches, `letterbox.cpp`, `spritehack.cpp`) | GPL-2.0 | changes to [gmloader-next](https://github.com/JohnnyonFlame/gmloader-next) (`make_patches.py`, `build.sh` there are 0BSD) |
+| `mpv/` (`context_sdl.c`, `gl-sdl.patch`) | LGPL-2.1-or-later | changes to [mpv](https://github.com/mpv-player/mpv) (`build_libmpv.sh` is 0BSD) |
+| `devtools/gl4es-test/patches/` | MIT | patches to [gl4es](https://github.com/ptitSeb/gl4es) (`make_candidate.py` there is 0BSD) |
 
 `shim/sysvsem/` and `devtools/profiling/fpslog/` say 0BSD in their own headers, matching the rest.
 
-Not included, get them upstream: `stb_dxt.h` for unity4shrink
-([nothings/stb](https://github.com/nothings/stb), public domain / MIT).
+Not included, get them upstream: `stb_dxt.h` for unity4shrink and `stb_image.h` for gmsprites
+([nothings/stb](https://github.com/nothings/stb), public domain / MIT); ARM's
+[astc-encoder](https://github.com/ARM-software/astc-encoder) (Apache-2.0) for unity4shrink, glxsdl's
+`astc_dec.cpp` and gmsprites.

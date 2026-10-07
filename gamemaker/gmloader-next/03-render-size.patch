@@ -1,0 +1,95 @@
+diff -ruN a/gmloader/configuration.cpp b/gmloader/configuration.cpp
+--- a/gmloader/configuration.cpp	2026-10-03 16:06:14.810073850 -0400
++++ b/gmloader/configuration.cpp	2026-10-05 19:55:57.253642821 -0400
+@@ -18,6 +18,7 @@
+     get_if_exists("disable_texhack", disable_texhack);
+     get_if_exists("rumble_scale", rumble_scale);
+     get_if_exists("force_platform", force_platform);
++    get_if_exists("render_size", render_size);
+ }
+ 
+ void gml_config::init_defaults(){
+@@ -69,4 +70,5 @@
+     printf("config: disable_texhack = %d\n", disable_texhack);
+     printf("config: rumble_scale = %f\n", rumble_scale);
+     printf("config: force_platform = %s\n", force_platform.c_str());
++    printf("config: render_size = %s\n", render_size.c_str());
+ }
+\ No newline at end of file
+diff -ruN a/gmloader/configuration.h b/gmloader/configuration.h
+--- a/gmloader/configuration.h	2026-10-03 16:06:14.810073850 -0400
++++ b/gmloader/configuration.h	2026-10-05 19:55:57.253642821 -0400
+@@ -20,6 +20,7 @@
+     bool disable_texhack;
+     float rumble_scale;
+     std::string force_platform;
++    std::string render_size;
+ 
+     friend void from_json(const json& j, gml_config& c);
+     void init_defaults();
+diff -ruN a/gmloader/main.cpp b/gmloader/main.cpp
+--- a/gmloader/main.cpp	2026-10-03 16:06:14.810073850 -0400
++++ b/gmloader/main.cpp	2026-10-05 19:55:57.257642759 -0400
+@@ -58,6 +58,10 @@
+ 
+ so_module *libyoyo = NULL;
+ 
++/* letterbox.cpp */
++void letterbox_size(int *w, int *h);
++void letterbox_present();
++
+ int RunnerJNILib_MoveTaskToBackCalled = 0;
+ 
+ static fs::path get_absolute_path(const char* path, fs::path work_dir){
+@@ -255,6 +259,8 @@
+     SDL_GetWindowSize(sdl_win, &sw, &sh);
+     splash_render(apk, sw, sh, sdl_win);
+ 
++    SDL_GetWindowSize(sdl_win, &w, &h);
++    letterbox_size(&w, &h);
+     RunnerJNILib::Startup(env, 0, apk_path_arg, save_dir_arg, pkg_dir_arg, 4, 0);
+     setup_ended = 1;
+ 
+@@ -265,9 +271,12 @@
+         if (update_inputs(sdl_win) != 1)
+             break;
+         SDL_GetWindowSize(sdl_win, &w, &h);
++        letterbox_size(&w, &h);
+         cont = RunnerJNILib::Process(env, 0, w, h, 0, 0, 0, 0, 0, 60);
+-        if (RunnerJNILib::canFlip(env, 0))
++        if (RunnerJNILib::canFlip(env, 0)) {
++            letterbox_present();
+             SDL_GL_SwapWindow(sdl_win);
++        }
+     }
+ 
+     SDL_GL_DeleteContext(sdl_ctx);
+diff -ruN a/thunks/khronos/gles2.cpp b/thunks/khronos/gles2.cpp
+--- a/thunks/khronos/gles2.cpp	2026-10-03 16:06:14.810073850 -0400
++++ b/thunks/khronos/gles2.cpp	2026-10-05 19:55:57.265642635 -0400
+@@ -77,6 +77,9 @@
+ 	}
+ }
+ 
++ABI_ATTR void letterbox_glBindFramebuffer(GLenum target, GLuint framebuffer);
++ABI_ATTR void letterbox_glGetIntegerv(GLenum pname, GLint *data);
++
+ void set_gles2_shader_override_dir(const char *path, bool should_dump)
+ {
+ 	should_dump_shaders = should_dump;
+@@ -94,6 +97,7 @@
+ 	glad_glBindAttribLocation = (PFNGLBINDATTRIBLOCATIONPROC)PTR_RESOLVE(glBindAttribLocation);
+ 	glad_glBindBuffer = (PFNGLBINDBUFFERPROC)PTR_RESOLVE(glBindBuffer);
+ 	glad_glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)PTR_RESOLVE(glBindFramebuffer);
++	symtable_gles2[symtable_gles2_index-1].func = (uintptr_t)letterbox_glBindFramebuffer;
+ 	glad_glBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC)PTR_RESOLVE(glBindRenderbuffer);
+ 	glad_glBindTexture = (PFNGLBINDTEXTUREPROC)PTR_RESOLVE(glBindTexture);
+ 	glad_glBlendColor = (PFNGLBLENDCOLORPROC)PTR_RESOLVE(glBlendColor);
+@@ -153,6 +157,7 @@
+ 	glad_glGetFloatv = (PFNGLGETFLOATVPROC)PTR_RESOLVE(glGetFloatv);
+ 	glad_glGetFramebufferAttachmentParameteriv = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC)PTR_RESOLVE(glGetFramebufferAttachmentParameteriv);
+ 	glad_glGetIntegerv = (PFNGLGETINTEGERVPROC)PTR_RESOLVE(glGetIntegerv);
++	symtable_gles2[symtable_gles2_index-1].func = (uintptr_t)letterbox_glGetIntegerv;
+ 	glad_glGetProgramiv = (PFNGLGETPROGRAMIVPROC)PTR_RESOLVE(glGetProgramiv);
+ 	glad_glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)PTR_RESOLVE(glGetProgramInfoLog);
+ 	glad_glGetRenderbufferParameteriv = (PFNGLGETRENDERBUFFERPARAMETERIVPROC)PTR_RESOLVE(glGetRenderbufferParameteriv);

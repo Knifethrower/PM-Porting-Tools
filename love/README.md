@@ -12,10 +12,28 @@ Launchers to copy: `C:\Claude\Sienna\release\Sienna.sh` (keys via gptokeyb2),
   `ParticleSystem:setColors` and `ImageData` pixels (0-1 now). From Duck Marines.
   `love.audio.newSource(path)` needs a type on 11 (`"static"`/`"stream"`): Orthorobot wraps it
   in its compat.lua. 0.9-era games: `love.graphics.setMode` and `"l"`/`"r"` mouse buttons.
+  Since 2026-10-03 the shim also returns `getColor`/`getBackgroundColor` in 0-255 (a library's
+  getColor -> setColor round trip had tinted Codename LT's whole frame black) and replaces the
+  deprecated `isDirectory`/`isFile` (their warning is drawn on screen), gives `newSource` a default
+  type, and restores `Image:getData()` (keeps each image's ImageData; Lonoma's picking uses it).
+  `love.graphics.newScreenshot` is gone in 11: copy the game's own render canvas instead
+  (`C:\Claude\CodenameLT\tools-src\codenamelt_port.py`).
+- Tools (2026-10-03): `add_compat.py <game dir>` (copies the shim, requires it, sets t.version);
+  `make_love_release.py <port folder>` builds `release/` (launcher, ini, port.json, gameinfo.xml,
+  gamedata via git archive incl. submodules, licenses, patch) from a `port.toml` (format in its
+  header; example `C:\Claude\KleleAtoms\port.toml`); `testing_thread.py <release> <title> <url>`
+  writes the Discord post from the README controls table. Device loop: `devtools/device/knulli_tmp/`.
 - GLES runtime: shader uniforms named like GLSL ES 3 built-ins (`textureSize`) fail to compile,
   and so does implicit int -> float (`float * int uniform`: cast with `float()`, NEON PHASE).
 - Games that call `love.joystick.loadGamepadMappings(<bundled db>)` override the firmware's
   mapping: drop the call (NEON PHASE), as with Taisei's gamecontrollerdb.
+- `t.window.msaa` above what the GPU offers (Star Phase asked for 32): LÖVE recreates the window and
+  on KMSDRM that window gets **no keyboard events at all** (the pad still works). Set it to 0.
+- PNGs with a bad chunk CRC load on some desktops but LÖVE 11 refuses them ("invalid CRC
+  encountered"): `C:\Claude\Star Phase\tools-src\png_crc_fix.py <dir> [--fix]`.
+- 1 GB devices: add up the decoded image sizes (w*h*4) before trying; Star Phase's 4000 px planets
+  got it OOM-killed while loading (stored at 1/4, drawn x4). Copy big games to the device over the
+  SMB share, never into /tmp (tmpfs = RAM).
 - D-pad: on most handhelds SDL maps it as gamepad buttons; games that read only `getHat` need
   `isGamepadDown('dpleft', ...)` too (Zabuyaki).
 - No hardware cursor on KMSDRM: games using the system cursor need their own pointer drawn
@@ -43,7 +61,11 @@ Tested on the PC (LÖVE 11.5, Xvfb at 640x480, 720x720, 960x544, 1280x720): a te
 scissor, mouse events, setMode) and three real games against their hand-written fits: Safety Blanket
 (draws into its own canvas and scales it), Orthorobot (0.10 compat shim, own mouse helpers; a
 click on its menu works), IYFCT (3:1 strip, no mouse module). Matched within the games' own
-animation. Not yet run on a device.
+animation. On the RG Cube XX (2026-10-04): A Village in the Sky (800x480, pointer; clicks, drag-pan
+and zoom with a gptokeyb2 stick mouse) works. Lonoma (640x480 point-and-click with the 0.10 shim)
+works too; its object picking needed `Image:getData()` back (now in the shim). Debugging tip: run the
+game on the PC first (`love .` in Xvfb, clicks with xdotool, `C:\Claude\Lonoma\tools-src\pctest.sh`)
+— an error that the device only shows as "nothing happens" appears in the log at once.
 
 Lessons from writing it: transforming the game's drawing instead (origin/scissor hooks) breaks
 games that set their scale while a canvas is active; LÖVE refuses `present()` and

@@ -9,6 +9,7 @@
 #   SYSROOT  arm64 sysroot / chroot with the game's libraries (default ~/chroot-bullseye)
 #   BIN      binary in the port folder to wrap (default: the only *.aarch64 there)
 #   TIMEOUT  seconds the game runs per launch (default 25)
+#   GAMEDATA folder whose contents are copied into the port's gamedata/ (ports that need game files)
 #   DUMMY=1  SDL dummy video instead of Xvfb (games that need no GL)
 #   XDISP    Xvfb display number (default 97)
 #   runs     launch the port this many times (first-launch setup, then normal start; default 1)
@@ -23,6 +24,7 @@ T=/tmp/pmsim_$(basename "$ZIP" .zip)
 [ -f "$ZIP" ] || { echo "usage: pm_sim_test.sh <port.zip> [runs]"; exit 1; }
 rm -rf "$T"; mkdir -p "$T/roms/ports" "$T/xdg/PortMaster"
 (cd "$T/roms/ports" && unzip -q "$ZIP")
+[ -n "$GAMEDATA" ] && cp -r "$GAMEDATA"/. "$(find "$T/roms/ports" -mindepth 2 -maxdepth 2 -type d -name gamedata | head -1)/"
 command -v 7z >/dev/null && ln -s "$(command -v 7z)" "$T/xdg/PortMaster/7zzs.aarch64"
 cat > "$T/xdg/PortMaster/control.txt" <<CTL
 directory=${T#/}/roms
@@ -35,6 +37,7 @@ sdl_controllerconfig="test-config"
 get_controls() { :; }
 pm_platform_helper() { echo "pm_platform_helper \$*"; }
 pm_finish() { echo pm_finish; }
+pm_message() { echo "pm_message: \$*"; }
 CTL
 cat > "$T/xdg/PortMaster/libgl_default.txt" <<'LGL'
 export LIBGL_ES=2

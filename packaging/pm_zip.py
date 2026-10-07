@@ -40,6 +40,11 @@ def entry(arc, src, mode):
 
 
 def add(z, src, arc, keep_crlf):
+    if arc.endswith('/'):                                # empty folder (e.g. assets/ for the game files)
+        info = zipfile.ZipInfo(arc, time.localtime(os.path.getmtime(src))[:6])
+        info.external_attr = (0o040755 << 16) | 0x10
+        z.writestr(info, b'')
+        return
     with open(src, 'rb') as f:
         data = f.read()
     mode = 0o755 if is_exec(data[:4], arc) else 0o644
@@ -60,6 +65,8 @@ def add_stream(z, src, arc):
 def walk(base):
     for root, dirs, files in os.walk(base):
         dirs[:] = sorted(d for d in dirs if d != '__pycache__')
+        if not dirs and not files and root != base:
+            yield root, os.path.relpath(root, base).replace(os.sep, '/') + '/'
         for fn in sorted(files):
             p = os.path.join(root, fn)
             yield p, os.path.relpath(p, base).replace(os.sep, '/')

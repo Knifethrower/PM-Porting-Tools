@@ -1,3 +1,5 @@
+> **Updated 2026-10-05** to the sources shipped with the Ittle Dew and Teslagrad ports: `xstub.c` (libX11 stand-in, `XSTUB_SCREEN=WxH`), `stubs.c` (libXcursor + libGLU stand-ins), `glxsdl.c` (GLX on SDL2: main-FBO 16:9 letterbox, loading screen, ASTC relabel, joystick filter; settings from the file named by `GLXSDL_CONFIG`: `dxt5_astc = 0|1|2`, `pad = <joystick name>`), `astc_dec.cpp` (ASTC decode fallback for GPUs without ASTC; needs ARM's astc-encoder), `build.sh`. `glxsdl-offscreen.patch` applies to the pre-letterbox glxsdl only (superseded); `xstubwrap.sh` / `xtracewrap.sh` are Westonpack-era debugging helpers.
+
 # xstub: libX11 stand-in for Unity 4 players under box64 + Westonpack
 
 A native aarch64 `libX11.so.6` (plus a tiny `libXcursor.so.1`) that answers a Unity 4 Linux player's Xlib calls
@@ -24,4 +26,7 @@ What the player needs (learned the hard way, details in the Ittle Dew notes, sec
   as a 60/48 fps alternation).
 - `xtracewrap.sh` + Westonpack's `tools/xtrace` records the real X traffic of a normal run (run the proxy outside
   the crusty preload).
-Build: `build.sh` (aarch64 cross compiler, host X11 headers). `XSTUB_LOG=1` logs every call.
+Build: `build.sh` inside the Debian bullseye arm64 chroot (`../../build/native-aarch64/chroot.sh`; needs
+libx11-dev, libxcursor-dev, libgl-dev and astc-encoder 5.3.0 at ~/astc-encoder in the chroot). glibc, libstdc++
+and libgcc stay dynamic: PortMaster forbids statically linking core system libraries. On an x86_64 host the same
+script only compile-checks the stub. `XSTUB_LOG=1` logs every call.

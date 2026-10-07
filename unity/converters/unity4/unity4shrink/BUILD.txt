@@ -1,7 +1,13 @@
-unity4shrink: halves large DXT1/DXT5 textures in Unity 4 asset files (used on low-memory devices).
-Built static for aarch64 (output is byte-identical to the x86_64 build):
-  aarch64-linux-gnu-gcc -O2 -static -march=armv8-a -ffp-contract=off -Wall -Wno-unused-function -s \
-    -o unity4shrink unity4shrink.c
-stb_dxt.h v1.12 by Sean Barrett (public domain / MIT), see licenses/stb_dxt.LICENSE.
+unity4shrink: halves large DXT1/DXT5 textures in Unity 4 asset files (used on low-memory devices), and with -a
+re-encodes every DXT5 texture as ASTC 4x4 blocks under the DXT5 label (glxsdl hands them to the GPU as ASTC).
+
+Built natively in a Debian bullseye arm64 chroot (GCC 10; glibc, libstdc++ and libgcc linked dynamically) with ARM's
+astc-encoder 5.3.0 compiled in (library sources only, NEON), see build.sh and README.md:
+  git clone --depth 1 --branch 5.3.0 https://github.com/ARM-software/astc-encoder.git ~/astc-encoder   (in the chroot)
+  bash build.sh            (in the chroot: out/unity4shrink; on an x86_64 PC: out/unity4shrink-host for PC tests)
+
+stb_dxt.h v1.12 by Sean Barrett (public domain / MIT), see licenses/LICENSE.stb_dxt.txt.
+astc-encoder (Apache-2.0), see licenses/LICENSE.astcenc.txt.
+
 Not in this repository: stb_dxt.h (third-party). Get v1.12 from https://github.com/nothings/stb/blob/master/stb_dxt.h
 and put it next to unity4shrink.c before building.

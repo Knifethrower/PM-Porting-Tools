@@ -39,3 +39,13 @@ aarch64-linux-gnu-readelf -d game.aarch64 | grep NEEDED
 
 Other routes seen: Micropolis used a Bootlin glibc 2.35 sysroot with Ubuntu's GCC 13 (works on
 fewer firmwares); box64 and the Unity shims use a glibc 2.28 Debian 10 sysroot (`~/sysroot-buster`).
+
+## Bullseye is archived (2026-10)
+
+Debian 11 left LTS in September 2026: its packages and security updates moved to `archive.debian.org`, and
+`deb.debian.org` returns 404 for files its indexes still list. `~/chroot-bullseye` now also has
+`deb http://archive.debian.org/debian-security bullseye-security main` (sources.list.d); point the other
+lines at `http://archive.debian.org/debian` too if `apt-get install` in the chroot starts failing. Ports
+that ship bullseye's libssl 1.1: take it from there (1.1.1w-0+deb11u8, not the chroot's old deb11u1).
+A rootless way to make such a sysroot on any Debian/Ubuntu (apt --download-only + dpkg-deb -x, absolute
+symlinks made relative): `C:\Claude\Jellyfin MPV Shim\public\setup.sh`.
