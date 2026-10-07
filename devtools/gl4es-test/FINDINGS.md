@@ -27,7 +27,7 @@ unchanged by the fixes (paths it hardly exercises). **Nothing here is device-tes
 
 | # | Bug | Ports | Fix |
 |--|--|--|--|
-| 10 | ARB parser heap overflow (`resize` returns bytes as element count): every longer ARB program corrupts the heap | **yes**: 5 Unity built-in programs, Teslagrad's real call stream crashes in `glProgramStringARB` | yes, 1 line |
+| 10 | ARB parser heap overflow (`resize` returns bytes as element count): every longer ARB program corrupts the heap | **yes**: 5 Unity programs (3 Unity built-ins, 2 of Teslagrad's), Teslagrad's real call stream crashes in `glProgramStringARB` | yes, 1 line |
 | 19 | fragment programs with more than 24 `program.local` entries overflow `frg_progloc[24]` in the program struct; locals 24+ unusable | **yes**: Unity's shadow-collector program uses 27 (all 4 games) | yes |
 | 18 | ARB→GLSL output written with `strcpy` whatever the given length: heap write past the output buffer | possible: the faulty call declares every PARAM array of ≤ 10 entries (Unity uses many); no corpus program hit the buffer end | yes |
 | 1 | immediate-mode draws use the NEXT ARB program / program parameters (glBegin/glEnd merging) | likely (Unity GL.Begin: Blit, image effects) | yes (flush), or `LIBGL_BEGINEND=0` |

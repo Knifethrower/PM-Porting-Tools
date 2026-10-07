@@ -9,6 +9,10 @@ Awakened Edition (GameMaker), Jellyfin MPV Shim (libmpv), Spaghetti Celesti and 
 (macOS arm64 via machismo), a batch of LÖVE games and a Box64 + Wine runtime. Only original code is here: no game files, no binaries, no third-party sources. Patches to
 other projects are included as patch files.
 
+**[docs/](docs/)** is the porting guide that goes with these tools: choosing an approach, devices
+and firmwares, packaging, graphics, box64, performance, testing, and one page per engine (Unity,
+LÖVE, Godot, GameMaker, native, Wine/Flash, macOS).
+
 Most scripts assume a Windows host with WSL (Ubuntu 24.04), Git Bash and Python 3; paths in the
 examples are the ones the ports used, so adapt them.
 

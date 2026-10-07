@@ -18,6 +18,8 @@ plays video through mpv/libmpv.
   25 minutes with all steps). `bash build_libmpv.sh [step...]`; output `~/jms/libmpv.so.2`.
 
 Status: PC-tested (qemu-aarch64 + Xvfb/Mesa; the context also natively on x86_64 with a uinput pad).
-Not yet run on a device; the first device run is Jellyfin MPV Shim's.
+On the RG Cube XX (Knulli, SDL `mali` driver, 720x720, 2026-10-05) with Jellyfin MPV Shim: a 720p episode
+in real time at ~25% CPU and 169 MB RSS; Big Buck Bunny 1080p30 H.264 (3.5 Mbit/s) in real time at ~213% of one
+core (of 400%), 297 MB RSS, in sync. Other firmwares untested.
 
 Licences: `context_sdl.c` and `gl-sdl.patch` are part of mpv, LGPL 2.1 or later (`LICENSE`); `build_libmpv.sh` is 0BSD.
