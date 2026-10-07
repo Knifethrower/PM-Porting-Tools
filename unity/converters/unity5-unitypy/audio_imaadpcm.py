@@ -1,4 +1,4 @@
-"""Audio conversion for Gone Home (Unity 2018.4).
+"""Audio conversion for Gone Home.
 
 Gone Home ships its audio as uncompressed 16-bit PCM (1.8 GB) in FMOD FSB5 containers inside
 *.resource files. For each assets file this:

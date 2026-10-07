@@ -1,6 +1,6 @@
 # unityport
 
-First-run conversion of Unity 5.x–2019 **Linux (Mono)** games for GLES-only ARM handhelds, as
+First-run conversion of Unity 5.x–2017.3 **Linux (Mono)** games for GLES-only ARM handhelds, as
 used by the Night in the Woods and Gone Home ports, in one reusable tool. A new Unity port gets a
 `game.toml` instead of a copied and edited `install.py`.
 

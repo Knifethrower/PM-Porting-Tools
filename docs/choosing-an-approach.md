@@ -35,10 +35,10 @@ measurements. Terms like box64, gl4es and Westonpack are explained in the [gloss
 | What you have | Route | Status in the author's ports (as of Oct 2026) | Details |
 |--|--|--|--|
 | Source code (open source, or a reimplementation) | Native aarch64 build against the firmware's SDL2; replace desktop GL with a native GLES 2 path | Many ports, 60 fps typical on an H700 | [engines/native](engines/native.md), [building-native-code](building-native-code.md) |
-| Unity 5.x to 2019 with a Linux x86_64 build | box64 + the game's Linux player; on-device conversion of shaders (GLCore -> GLES3) and textures (DXT -> ASTC); Westonpack (crusty) for GLX | Works: 10-30 fps on RK3566 after tuning | [engines/unity](engines/unity.md), [unityport](../unity/unityport/) |
+| Unity 5.x to 2017.3 with a Linux x86_64 build | box64 + the game's Linux player; on-device conversion of shaders (GLCore -> GLES3) and textures (DXT -> ASTC); Westonpack (crusty) for GLX | Works: 10-30 fps on RK3566 after tuning | [engines/unity](engines/unity.md), [unityport](../unity/unityport/) |
 | Unity 4 with a Linux x86_64 build | box64 + the player + gl4es, X11 and GLX provided in-process on the firmware's SDL2 (no Westonpack) | Works: 50-60 fps on the RG Cube XX | [engines/unity-4](engines/unity-4.md), [xstub/glxsdl](../shim/xstub/) |
 | Unity 4 with only a Windows, Mac or 32-bit Linux build (Mono) | Convert the game's data to run on one Unity 4.7.2 Linux x86_64 player (the donor technique), then as above | Works on PC for 4.0-4.7 data; first device runs (RG353V, RG Cube XX) Oct 2026, unreleased | [engines/unity-4-donor](engines/unity-4-donor.md) |
-| Unity 5+ with only a Windows build | Player swap only if the build carries GLCore shaders, which Windows 5+ builds rarely do; IL2CPP builds would need Wine | Not done | [engines/unity](engines/unity.md) |
+| Unity 5.x to 2017.3 with only a Windows build | Player swap only if the build carries GLCore shaders, which Windows 5+ builds rarely do; IL2CPP builds would need Wine | Not done | [engines/unity](engines/unity.md) |
 | LÖVE game | PortMaster's `love_11.5` runtime (in the control folder, nothing downloaded or compiled); LÖVE 0.8/0.9/0.10 games through a compat shim | Many ports, 60 fps typical | [engines/love](engines/love.md), [love tools](../love/) |
 | Godot 3 project or pack | PortMaster's `frt_3.5.2` runtime; source projects exported to a `.pck` (GLES2, ETC1 textures) | Several 2D ports; 3D works with shadows off | [engines/godot](engines/godot.md), [godot tools](../godot/) |
 | Godot 4 pack (Steam or itch build) | The pack on a stock Godot template of the same version, with stubs for Steam/PlayFab | PC only: reaches the title, RAM is the problem | [engines/godot](engines/godot.md) |
@@ -50,7 +50,7 @@ measurements. Terms like box64, gl4es and Westonpack are explained in the [gloss
 | FNA / XNA (.NET) | FNA has a native GLES path (`FNA3D_OPENGL_FORCE_ES3=1`: no gl4es, no Westonpack); older FNA/XNA assemblies run on PortMaster's Mono runtime. MonoGame's desktop build always asks for desktop GL and needs gl4es | Not done by the author | |
 | Windows-only, no engine route above | Box64 + Wine runtime | Runtime built, Wine runs on the RG353V (dArkOS); the X11/GDI output bridge is not yet confirmed on a device; the first game (Peggle Deluxe) needs wined3d's OpenGL even in 2D mode and is blocked on device OpenGL | [engines/windows-wine-and-flash](engines/windows-wine-and-flash.md), [wine tools](../wine/) |
 | App (Python, video) | PortMaster's `python_3.11` runtime; libmpv or LÖVE for the UI | Two apps | [engines/apps-and-video](engines/apps-and-video.md) |
-| Only an Android build | Not a route here, see [below](#why-not-the-android-player) | | |
+| Only an Android build | Not covered by these pages, see [below](#why-not-the-android-player) | | |
 
 Order of preference when more than one row fits: source port, then a native runtime (LÖVE, Godot,
 GameMaker, machismo, Ruffle), then box64 with the game's Linux build, then a player swap or donor,
@@ -87,7 +87,7 @@ games need an SDL2 port first; both were judged too big for a quick port.
 Details: [box64](box64.md), [graphics](graphics.md#gl4es).
 
 For Unity, the build, scripting backend (Mono or IL2CPP), version, shaders, plugins and RAM decide
-the route; check them with [Unity 5+](engines/unity.md#is-the-game-a-candidate) or
+the route; check them with [Unity 5.x to 2017.3](engines/unity.md#is-the-game-a-candidate) or
 [Unity 4](engines/unity-4.md#is-the-game-a-candidate). Only Mono builds can be moved to another
 player.
 
@@ -100,7 +100,7 @@ won:
 |--|--|
 | Replace the engine, re-render assets from the game data | Renders looked bad, far too much work |
 | Reuse a console (Vita) port, Vita3K, a native loader | Dead end for Linux ARM |
-| The Android build's ARM `libunity.so` through an Android loader | Needs a Bionic -> glibc bridge and a fake Java/JNI layer (below) |
+| The Android build's ARM `libunity.so` through an Android loader | Estimated, not tried: needs a Bionic -> glibc bridge and a Java/JNI layer (below) |
 | Native ARM64 Mono under box64 (bridging ~3,600 internal calls) | Weeks of work with GC, exception and signal problems. Profiling showed C# is only ~24% of the main thread, so the gain would be small |
 
 The general lesson: profile before a big rework. The sampling method is in
@@ -109,11 +109,13 @@ The general lesson: profile before a big rework. The sampling method is in
 ## Why not the Android player?
 
 An Android build looks tempting: a native ARM engine (no box64 cost), GLES shaders and ETC textures
-already. But the player swap that works from Windows to Linux does not carry over.
+already. The author did not take this route for the Unity versions these pages cover (4.x to 2017.3);
+this section records why, not a verdict on Android builds in general.
 
-The Linux player is a self-contained program (X11 window, OpenGL, its own input, data in plain files),
-and Windows and Linux builds share one data format. Android's `libunity.so` (with `libmono.so`,
-`libmain.so`) is a library that only runs inside Android:
+The player swap that works from Windows to Linux does not carry over directly. The Linux player is a
+self-contained program (X11 window, OpenGL, its own input, data in plain files), and Windows and Linux
+builds share one data format. Android's `libunity.so` (with `libmono.so`, `libmain.so`) is a library
+made to run inside Android:
 
 | It expects | On a Linux handheld |
 |--|--|
@@ -123,21 +125,19 @@ and Windows and Linux builds share one data format. Android's `libunity.so` (wit
 | Data read from the APK via `AAssetManager` | A replacement file layer |
 | OpenSL ES audio, `liblog`, system properties | More shims |
 
-That is an Android loader (so_loader style, like gmloader for GameMaker). GameMaker's runner needs a
-small Java surface; Unity's is much larger, and each game's plugins (ads, billing, analytics) add
-more. Estimate: weeks, with an uncertain end. Other catches:
+Bridging that is an Android loader's job (so_loader style, like gmloader for GameMaker).
+GameMaker's runner needs a small Java surface; Unity's is larger, and each game's plugins (ads,
+billing, analytics) add more. Other points the author ran into:
 
-- Unity 4 Android builds are ARMv7 only (arm64 came with Unity 5.6/2017): needs an armhf userland,
-  which not every firmware ships.
+- The Android players of these Unity versions are 32-bit ARMv7: they need an armhf userland, which
+  not every firmware ships.
 - Android data (GLES2 shaders, ETC/PVRTC textures, MP3/Vorbis audio) is readable only by the
   Android player; the halves cannot be mixed.
-- IL2CPP Android builds (most after ~2019) bake the scripts into `libil2cpp.so`: same loader
-  problem, and no managed DLLs to patch.
+- IL2CPP Android builds bake the scripts into `libil2cpp.so`: no managed DLLs to patch.
 - Waydroid or another Android container is too heavy for 1-2 GB handhelds.
 
-It would pay off only for a demanding Unity game with an Android build and no desktop build, where
-box64 cannot reach playable speed. Check first whether a Unity-capable Android loader already exists
-for PortMaster. For light games, box64 with a desktop player takes hours instead of weeks.
+For the author's ports, box64 with the game's desktop player was the quicker route. Check PortMaster
+for existing tools before starting on an Android build.
 
 ## Why games were skipped
 

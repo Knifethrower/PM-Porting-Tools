@@ -1,11 +1,12 @@
-# Unity 5.x to 2019 (Linux builds)
+# Unity 5.x to 2017.3 (Linux builds)
 
-How to run a Unity 5.x to 2019 game's Linux x86_64 build on a GLES-only aarch64 handheld: how the player
+How to run a Unity 5.x to 2017.3 game's Linux x86_64 build on a GLES-only aarch64 handheld: how the player
 behaves, what has to be converted in the game data (shaders, textures, audio, timing, settings) and the
-first-run converter that does it on the device. Unity 4 is a different pipeline: see [Unity 4](unity-4.md).
+first-run converter that does it on the device. Newer Unity versions are not covered. Unity 4 is a different
+pipeline: see [Unity 4](unity-4.md).
 
 The lessons come from two ports: Night in the Woods (Unity 5.6.2p4, Mono, FMOD Studio 1.09, 2D) and Gone Home
-(Unity 2018.4.9f1, legacy Mono, deferred rendering + HDR, NGUI, 3D first person). Both run on the Anbernic
+(legacy Mono, deferred rendering + HDR, NGUI, 3D first person). Both run on the Anbernic
 RG353V (RK3566, Mali-G52, 2 GB, 640x480, dArkOS); Gone Home was confirmed playing very well there.
 
 Contents: [The route](#the-route) · [Candidate checks](#is-the-game-a-candidate) ·
@@ -23,12 +24,12 @@ Contents: [The route](#the-route) · [Candidate checks](#is-the-game-a-candidate
 | glespass | a `libGL.so.1` that passes GL calls straight to the driver's GLES, since the converted game is already GLES | [graphics](../graphics.md), [`shim/glespass-nitw`](../../shim/glespass-nitw/) |
 | first-run conversion | converts the user's copy of the game on the device (shaders, textures, audio, settings) | [unityport](../../unity/unityport/), below |
 
-Other routes that were tried and dropped (re-rendering assets, console ports, the Android player, native ARM
-Mono) are compared in [choosing an approach](../choosing-an-approach.md).
+Other routes that were tried or estimated (re-rendering assets, console ports, native ARM Mono) and the
+author's notes on Android builds are in [choosing an approach](../choosing-an-approach.md).
 
 ## Is the game a candidate?
 
-- **A Linux x86_64 build exists** (GOG, Steam). A Windows-only Unity 5+ game rarely carries OpenGL shaders
+- **A Linux x86_64 build exists** (GOG, Steam). A Windows-only Unity 5.x to 2017.3 game rarely carries OpenGL shaders
   (Unity 4 Windows builds usually do, see [Unity 4](unity-4.md)), and a Windows-only IL2CPP game would need Wine.
 - **Scripting backend**: Mono (`<Game>_Data/Mono/x86_64/libmono.so` = legacy Mono 2.x, or `MonoBleedingEdge/`)
   or IL2CPP (`GameAssembly.so`). Both run under box64; Mono has a JIT, which matters for box64 settings
@@ -78,7 +79,7 @@ This is the essential step for Mali's GLES-only drivers.
 - Unity Linux builds ship only **GLCore** shaders (platform 15) and sometimes Vulkan. The Mali blob driver is
   GLES only.
 - Each `Shader` has `platforms`, `offsets`, `compressedLengths`, `decompressedLengths` and one **LZ4
-  block-compressed** `compressedBlob`. The per-platform blob (format of 5.5 to 2019.2) is
+  block-compressed** `compressedBlob`. The per-platform blob (format from 5.5 on) is
   `int count; {int offset, int length}[count]`, and each entry is `version, gpuProgramType, stats (12 bytes),
   a 5.5+ field, keyword list, int codeLen, code (4-aligned), tail`.
 - Conversion: GLSL `#version 150` / `330` -> `#version 300 es` plus `precision highp float/int` (and sampler
@@ -90,7 +91,7 @@ This is the essential step for Mali's GLES-only drivers.
   `m_ParsedForm.m_SubShaders[].m_Passes[].prog{Vertex,Fragment,...}.m_SubPrograms`.
 - Keep the GLCore variants: a desktop-GL path (Panfrost on ROCKNIX) needs them.
 - Validate with `glslangValidator` on the PC; on the device, log compile and link failures from the GL shim.
-- The same blob format and conversion worked for 2018.4 unchanged: Gone Home's 93 shaders (2,010 stages) all
+- The same blob format and conversion worked unchanged for Gone Home's 93 shaders (2,010 stages) all
   pass glslangValidator.
 - Then set the graphics API list to `[11, 17]` (see the player section above).
 
@@ -183,7 +184,7 @@ Mali has no S3TC (DXT), so DXT textures are decoded and re-encoded as ASTC.
 ## unityport: the converter as one tool
 
 [unityport](../../unity/unityport/) is the first-run converter of both ports as one reusable tool. A new
-Unity 5.x to 2019 port gets a `game.toml` instead of a copied install script.
+Unity 5.x to 2017.3 port gets a `game.toml` instead of a copied install script.
 
 - `python -m unityport survey <game folder>` reports the Unity version, backend, graphics APIs, shaders without
   GLES3 programs, textures by format, PCM clips and the maximum timestep, and prints a starting config.

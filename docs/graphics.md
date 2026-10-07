@@ -25,7 +25,7 @@ Terms used below:
 |--|--|--|
 | Source available, draws with OpenGL 1.x/2.x | Native GLES 2 layer compiled into the game | Always preferred. [Native GLES 2](#native-gles-2-when-you-have-the-source) |
 | Native aarch64 binary with no GLES path (closed engine, rebuilt source you do not want to touch) | gl4es standalone, through PortMaster's `libgl_default.txt` | Native ports, no Westonpack |
-| x86_64 game under [box64](box64.md) that needs X11 + GLX (Unity 5 to 2019 players) | Westonpack `crusty_glx_gl4es`, or `crusty_glx` + glespass once the shaders are GLES | [Westonpack](#westonpack-and-crusty) |
+| x86_64 game under [box64](box64.md) that needs X11 + GLX (Unity 5.x to 2017.3 players) | Westonpack `crusty_glx_gl4es`, or `crusty_glx` + glespass once the shaders are GLES | [Westonpack](#westonpack-and-crusty) |
 | Unity 4 x86_64 player under box64 | gl4es + an X11 stand-in + GLX on the firmware's SDL2 (glxsdl), no Westonpack | [glxsdl](#without-westonpack-glx-on-the-firmwares-sdl2), [Unity 4](engines/unity-4.md) |
 | Program with its own window code (mpv, Ruffle) | Give it an SDL2 window and GLES context instead of its DRM or X11 one | [apps and video](engines/apps-and-video.md), [Windows, Wine and Flash](engines/windows-wine-and-flash.md) |
 | ROCKNIX on Panfrost | westonwrap's Mesa bypass: the game runs on the system's desktop GL | [Basics](#basics) |
@@ -221,7 +221,7 @@ much.
   and westonwrap **bypasses** Weston and runs the command directly on ROCKNIX's desktop with native Mesa GL
   (unless `NO_PANFROST_BYPASS=1`). It fails on libmali, and crusty runs in Wayland mode (`CRUSTY_WLMODE=1`).
   In the bypass only `WRAPPED_LIBRARY_PATH*` reaches the game, not your `LD_LIBRARY_PATH`.
-- What works where for Unity 5 to 2019 games on crusty + glespass (dArkOS, ROCKNIX libmali, ROCKNIX Panfrost):
+- What works where for Unity 5.x to 2017.3 games on crusty + glespass (dArkOS, ROCKNIX libmali, ROCKNIX Panfrost):
   [Unity: status per firmware](engines/unity.md#status-per-firmware).
 - crusty variables (from the binary): `CRUSTY_BLOCK_INPUT`, `CRUSTY_SHOW_CURSOR` (cursor is off unless 1),
   `CRUSTY_FPS`, `CRUSTY_RESOLUTION`, `CRUSTY_GLES`, `CRUSTY_GL4ES` (crusty initialises gl4es only with it;
@@ -252,7 +252,7 @@ much.
 
 ## glespass: GLES games on crusty without gl4es
 
-For a game that already issues only GLES calls (a Unity 5 to 2019 build whose shaders were converted to GLES 3,
+For a game that already issues only GLES calls (a Unity 5.x to 2017.3 build whose shaders were converted to GLES 3,
 see [Unity](engines/unity.md)), gl4es has nothing to translate. crusty still expects a gl4es: it calls
 `initialize_gl4es()` / `gl4es_GetProcAddress()` and wants all `gl*` entry points. glespass
 ([shim/glespass-nitw](../shim/glespass-nitw/), [shim/glespass-gonehome](../shim/glespass-gonehome/), tests in

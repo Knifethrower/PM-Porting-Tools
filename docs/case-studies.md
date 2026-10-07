@@ -19,7 +19,7 @@ play from a median of 11 to 16.5 fps on the RG353V. Profiling under box64 showed
 not the GPU, is the limit. Black frames on ROCKNIX with libmali stayed unsolved.
 [Unity](engines/unity.md), [graphics](graphics.md), [performance](performance-and-memory.md).
 
-**Gone Home** (Unity 2018.4, 3D, deferred + HDR). The same pipeline carried over almost unchanged
+**Gone Home** (Unity, 3D, deferred + HDR). The same pipeline carried over almost unchanged
 and plays very well on the RG353V. New lessons: game time must not depend on the frame rate (check
 it in every port that runs below its target fps), PCM audio converted to IMA ADPCM, and game
 options files that override the command line. Its installer and Night in the Woods' were merged

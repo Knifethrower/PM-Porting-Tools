@@ -1,4 +1,4 @@
-"""Texture conversion for Gone Home (Unity 2018.4) on ARM handhelds, run in place on the device.
+"""Texture conversion for Gone Home on ARM handhelds, run in place on the device.
 
 Mali and most other handheld GPUs have no DXT (S3TC) support, so every streamed DXT1/DXT5/RGB(A)
 texture is decoded and re-encoded as ASTC:

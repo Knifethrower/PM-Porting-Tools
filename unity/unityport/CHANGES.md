@@ -13,7 +13,7 @@ Verification on the PC (Windows, Python 3.10, UnityPy 1.25.3):
   examples/gonehome.toml`, each on a fresh copy of the GOG installer
   (`gone_home_2020_01_28_35744.sh`, AUDIO_ADPCM=1): **identical game folders** (181 files,
   1.2 GB; state files excluded), and both identical to the conversion shipped for the RG353V test. About 2.5 minutes each.
-- `survey` on the original Gone Home files: 6 s; reports Unity 2018.4.9f1, Mono, GLCore/Vulkan,
+- `survey` on the original Gone Home files: 6 s; reports the Unity version, Mono, GLCore/Vulkan,
   99 shaders without GLES3 programs, 1,532 textures (DXT5/DXT1/RGBA32), 365 PCM clips, the
   0.033 s maximum timestep; the suggested steps are exactly the ones the port uses, and the
   printed config parses.

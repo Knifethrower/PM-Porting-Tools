@@ -263,7 +263,7 @@ could cut it (not tried). Re-encoding is on [Unity](engines/unity.md).
 4. **Inventory the assets** before guessing: sum the byte size per class per file and note which
    textures are readable and how audio is stored. [`tex_inventory.py`](../unity/converters/unity4/)
    lists the large textures of a Unity 4 game with size, format and bytes;
-   [`unityport`](../unity/unityport/) can survey a Unity 5+ game.
+   [`unityport`](../unity/unityport/) can survey a Unity 5.x to 2017.3 game.
 
 Findings from Ittle Dew (Unity 4, Sep 2026):
 

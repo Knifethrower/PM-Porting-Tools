@@ -1,4 +1,4 @@
-# Gone Home (Unity 2018.4.9f1, deferred 3D, NGUI menus). Produces byte-for-byte the same game
+# Gone Home (deferred 3D, NGUI menus). Produces byte-for-byte the same game
 # files as the port's own install.py (release/gonehome/tools in the Gone Home port).
 
 steps = ["shaders", "settings", "textures", "sprites", "audio", "timing"]
