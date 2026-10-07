@@ -556,7 +556,7 @@ KNOWN_LIBS = [
     (r"^(lib)?SDL2_ttf", "portable", "libSDL2_ttf-2.0.so.0", ""),
     (r"^(lib)?SDL2_net", "portable", "libSDL2_net-2.0.so.0", ""),
     (r"^(lib)?SDL2(-2\.0)?", "portable", "libSDL2-2.0.so.0", ""),
-    (r"^(lib)?SDL3", "portable", "libSDL3.so.0", "CFWs ship SDL2 only: see Shared/sdl3-on-sdl2"),
+    (r"^(lib)?SDL3", "portable", "libSDL3.so.0", "CFWs ship SDL2 only: needs an SDL3-on-SDL2 shim"),
     (r"^libfreetype", "portable", "libfreetype.so.6", ""),
     (r"^(libopenal|OpenAL$)", "portable", "libopenal.so.1", ""),
     (r"^libvorbisfile", "portable", "libvorbisfile.so.3", ""),
@@ -662,7 +662,7 @@ ENGINE_FILES = [
 ]
 
 OTHER_ROUTE = {
-    "Unity": "Unity: use the Linux/Windows build with box64 (Shared/unityport)",
+    "Unity": "Unity: use the Linux/Windows build with box64 (unity/unityport in PM-Porting-Tools)",
     "GameMaker": "GameMaker: Mac runner is Cocoa/Metal; look at the Android/Linux route",
     "LÖVE": "LÖVE: PortMaster's love runtime runs the .love directly",
     "HashLink": "HashLink: hlboot.dat runs on a native aarch64 HashLink",

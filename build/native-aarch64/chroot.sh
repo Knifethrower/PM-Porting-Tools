@@ -3,7 +3,7 @@
 # project folder bind-mounted at /work. Binaries built there need only glibc 2.31 and GCC 10's
 # libstdc++, which every current PortMaster CFW has.
 #   wsl -u root -e bash chroot.sh <project dir> "<command>"
-#   e.g. wsl -u root -e bash chroot.sh /mnt/c/Claude/3DMM "bash /work/tools-src/build_3dmm.sh"
+#   e.g. wsl -u root -e bash chroot.sh /mnt/c/src/mygame "bash /work/tools-src/build_3dmm.sh"
 # CHROOT overrides the chroot (default: ~<first user>/chroot-bullseye). Setting it up: README.md.
 # From 3D Movie Maker (tools-src/chroot.sh).
 PROJ=$1; shift

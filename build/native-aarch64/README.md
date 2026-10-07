@@ -48,4 +48,4 @@ Debian 11 left LTS in September 2026: its packages and security updates moved to
 lines at `http://archive.debian.org/debian` too if `apt-get install` in the chroot starts failing. Ports
 that ship bullseye's libssl 1.1: take it from there (1.1.1w-0+deb11u8, not the chroot's old deb11u1).
 A rootless way to make such a sysroot on any Debian/Ubuntu (apt --download-only + dpkg-deb -x, absolute
-symlinks made relative): `C:\Claude\Jellyfin MPV Shim\public\setup.sh`.
+symlinks made relative) is in the Jellyfin MPV Shim port's build files (`setup.sh`).

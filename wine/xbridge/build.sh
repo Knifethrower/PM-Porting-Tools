@@ -3,7 +3,7 @@
 set -e
 cd "$(dirname "$0")"
 SYSROOT=${SYSROOT:-~/sysroot-buster/root}   # Debian 10 arm64 sysroot (glibc 2.28)
-WLIB=${WLIB:-/mnt/c/Claude/NITW/port/runtimes/weston/lib_aarch64}   # lib_aarch64 of an unpacked weston_pkg_0.2 (unsquashfs)
+WLIB=${WLIB:?set WLIB=<dir>}   # lib_aarch64 of an unpacked weston_pkg_0.2 (unsquashfs)
 
 aarch64-linux-gnu-gcc -O2 -s -Wall -march=armv8-a -mtune=cortex-a55 \
   -nostdinc -isystem /usr/lib/gcc-cross/aarch64-linux-gnu/13/include \

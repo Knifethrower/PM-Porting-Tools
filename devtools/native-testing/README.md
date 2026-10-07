@@ -14,7 +14,7 @@ ImageMagick, and an arm64 sysroot (`../../build/native-aarch64`).
 
 FAKECLOCK freezes CLOCK_REALTIME and `time()`: games that time frames with std::chrono
 (libstdc++ `high_resolution_clock` = realtime) see zero deltas, and those seeding from `time()` get a fixed
-seed (Bugdom 2, `C:\Claude\Bugdom 2\pctest`). The probe also counts `glDrawElements`.
+seed (Bugdom 2's PC tests). The probe also counts `glDrawElements`.
 
 Build the probe once: `gcc -O2 -shared -fPIC -o ~/glcount.so ../profiling/device-sampler/glcount.c -ldl`.
 KEYS uses SDL scancodes, `"code:from-to ..."` in frames (Z 29, X 27, Enter 40, arrows R79 L80 D81 U82).

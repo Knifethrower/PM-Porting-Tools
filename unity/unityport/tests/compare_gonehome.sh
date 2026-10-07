@@ -4,7 +4,7 @@
 # usage: compare_gonehome.sh <work dir>      (needs ~8 GB; Git Bash on Windows, Python with UnityPy)
 set -e
 W=$1
-GH="/c/Claude/Gone Home"
+GH=${GH:?set GH=<folder with gone_home_*.sh and the port release/gonehome/tools/install.py>}
 UP="$(cd "$(dirname "$0")/.." && pwd)"
 export AUDIO_ADPCM=1
 if [ "$KEEP_OLD" != 1 ]; then              # KEEP_OLD=1: reuse the old installer's output

@@ -1,11 +1,11 @@
 #!/bin/bash
-# Equivalence test: the Night in the Woods port's install.py (Shared/templates/nitw) and
+# Equivalence test: the Night in the Woods port's install.py (from the released port) and
 # `unityport install nitw.toml` on two fresh copies of the GOG installer.
 # usage: compare_nitw.sh <work dir>      (needs ~10 GB; Git Bash on Windows, Python with UnityPy)
 set -e
 W=$1
-SH="/c/Claude/NITW/night_in_the_woods_en_406_21109.sh"
-OLD="/c/Claude/Shared/templates/nitw/nightinthewoods/tools/install.py"
+SH=${SH:?set SH=<the GOG installer night_in_the_woods_en_406_21109.sh>}
+OLD=${OLD:?set OLD=<the NITW port nightinthewoods/tools/install.py>}
 UP="$(cd "$(dirname "$0")/.." && pwd)"
 if [ "$KEEP_OLD" != 1 ]; then              # KEEP_OLD=1: reuse the old installer's output
   rm -rf "$W/old"; mkdir -p "$W/old"

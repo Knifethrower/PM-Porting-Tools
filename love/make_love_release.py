@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the release folder of a LÖVE port on PortMaster's love_11.5 runtime from a port.toml.
 
-usage (in WSL, python3 >= 3.11):  make_love_release.py <port folder on C:, e.g. /mnt/c/Claude/X>
+usage (in WSL, python3 >= 3.11):  make_love_release.py <port folder on C:, e.g. /mnt/c/src/mygame>
 Reads <port folder>/port.toml:
 
     title = "KłełeAtoms"            # port.json title; launcher is "<launcher>.sh"

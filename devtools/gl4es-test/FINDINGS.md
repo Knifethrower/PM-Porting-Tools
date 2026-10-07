@@ -210,7 +210,7 @@ unchanged by the fixes (paths it hardly exercises). **Nothing here is device-tes
   so finding 12 fails them all and hides other vertex-program differences (split it into its own picture);
   ARB shadow programs need depth textures in the scene once 7b is fixed; `aarch64/run_shipped.sh` unfinished.
 
-## Device check 2026-10-05 (RG Cube XX, Knulli, 192.168.1.61)
+## Device check 2026-10-05 (RG Cube XX, Knulli)
 
 Arm64 gl4es rebuilt from source as a drop-in for the ports' Westonpack binary (`aarch64/build_aarch64.sh`:
 a744af14, NOX11 + NOEGL + NO_INIT_CONSTRUCTOR, `aarch64/glxpass.c` forwarding glX* to glxsdl's crusty_glX*, the

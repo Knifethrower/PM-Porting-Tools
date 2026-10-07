@@ -66,7 +66,7 @@ Same scripted run (intro → title → new game → cutscene → tutorial level)
 MemAvailable: old port (stock gmloader, RGBA) 476 MB at the title and dies at the first cutscene
 load (also with its 2 GB repack patch: 403 MB, dies); with this + ASTC pages: 198 MB at the title,
 410 MB peak, ~276 MB in the level (droidports gmloader with the same changes: 158 / 396 / ~231).
-First-run setup for 861 images: 15 min. Details: `C:\Claude\DaydreamerAE\ASTC-NOTES.md`.
+First-run setup for 861 images: 15 min.
 
 ## Licences
 

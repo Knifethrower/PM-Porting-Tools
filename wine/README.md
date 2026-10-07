@@ -1,7 +1,7 @@
 # Wine on PortMaster: tools
 
-Tools from the Box64 + Wine 11.0 runtime (`C:\Claude\Wine`, `WINE-RUNTIME-NOTES.md`), used by the
-Peggle and Word Viewer ports. The runtime itself is built by `C:\Claude\Wine\tools-src\build_runtime.sh`.
+Tools from the Box64 + Wine 11.0 runtime, used by the
+Peggle and Word Viewer ports.
 
 | Path | What |
 |--|--|
@@ -11,4 +11,4 @@ Peggle and Word Viewer ports. The runtime itself is built by `C:\Claude\Wine\too
 | `box64/` | `wine-reserve.patch` for box64 0.4.4: reserve the low 32-bit area up to box64's own load address like wine-preloader does, so 32-bit programs with a fixed image base above 0x30110000 (Word Viewer 2003) can be mapped. `build_box64.sh` applies it on a copy of the portable build. |
 | `link_prefix.py` | `link_prefix.py <prefix> <wine dir>`: replaces prefix files that are byte-identical to a Wine builtin DLL with relative symlinks into the runtime, so a shipped prefix stays small. |
 | `bin2iso.py` | MODE1/2352 `.bin` (one data track) to `.iso`, for installing from a user's disc image. |
-| `send_events.py` | Writes raw `struct input_event` records (pointer moves, clicks, a key) like gptokeyb's device: feed into xbridge's `XBRIDGE_INPUT` FIFO for the PC input test (`C:\Claude\Wine\pctest\xbridge_input_test.sh`). |
+| `send_events.py` | Writes raw `struct input_event` records (pointer moves, clicks, a key) like gptokeyb's device: feed into xbridge's `XBRIDGE_INPUT` FIFO for the PC input test. |

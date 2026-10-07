@@ -18,12 +18,12 @@ Ittle Dew / Usagi ports.
 On the PC:
 
 ```
-PYTHONPATH=C:/Claude/Shared/unityport python -m unityport survey "<game folder>"
-PYTHONPATH=C:/Claude/Shared/unityport python -m unityport install game.toml "<copy of the game folder>"
+PYTHONPATH=<this repo>/unity/unityport python -m unityport survey "<game folder>"
+PYTHONPATH=<this repo>/unity/unityport python -m unityport install game.toml "<copy of the game folder>"
 ```
 
 On the device, from the port's `patchscript`, with PortMaster's `python_3.11` runtime mounted and
-`Shared/pylib/unitypy-astc-full` as the package folder:
+a folder with UnityPy (built with ASTC support) and its dependencies for aarch64 as the package folder:
 
 ```
 export PYTHONPATH="$GAMEDIR/tools/pylib:$GAMEDIR/tools"

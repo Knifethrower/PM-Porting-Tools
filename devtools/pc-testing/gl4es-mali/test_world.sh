@@ -2,7 +2,7 @@
 # usage: test_world.sh <name> [player args]   (env vars pass through to gl4es)
 # Fresh profile -> new game -> gameplay; prints the mean brightness of the world area (0 = black).
 N=$1; shift
-G=~/ittledew/game; D="/mnt/c/Claude/Ittle Dew/pctest"
+G=~/ittledew/game; D="${OUT_DIR:-$HOME/ittledew/shots}"; mkdir -p "$D"
 pkill -x IttleDew.x86_64; pkill -x Xvfb; pkill -x openbox; sleep 1
 rm -rf ~/.config/unity3d/Ludosity; rm -f ~/ittledew/unity.log
 Xvfb :99 -screen 0 640x480x24 >/dev/null 2>&1 &

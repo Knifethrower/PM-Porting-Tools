@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds box64 0.4.4 for the Wine runtime: the portable build (Shared/box64 box64-portable: glibc 2.28
+# Builds box64 0.4.4 for the Wine runtime: the portable build (glibc 2.28
 # sysroot, -march=armv8-a -mtune=cortex-a55, BAD_SIGNAL) plus wine-reserve.patch. Run in WSL.
 set -euo pipefail
 SRC=~/box64build/box64-0.4.4

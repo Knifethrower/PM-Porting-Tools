@@ -1,5 +1,5 @@
 # Night in the Woods (Unity 5.6.2p4, 2D, FMOD Studio 1.09). The rules of the port's own
-# install.py (C:\Claude\Shared\templates\nitw\nightinthewoods\tools).
+# install.py (nightinthewoods/tools in the Night in the Woods port).
 
 steps = ["shaders", "settings", "textures", "sprites", "fmod"]
 
