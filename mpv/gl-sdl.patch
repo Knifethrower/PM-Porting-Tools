@@ -1,0 +1,56 @@
+diff --git a/meson.build b/meson.build
+index fb10be5..aff3759 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1267,6 +1267,17 @@ if features['egl-x11']
+     sources += files('video/out/opengl/context_x11egl.c')
+ endif
+ 
++gl_sdl = get_option('gl-sdl').require(
++    sdl2.found() and gl_allowed,
++    error_message: 'sdl2 was not found!',
++)
++features += {'gl-sdl': gl_sdl.allowed()}
++if features['gl-sdl']
++    dependencies += sdl2
++    features += {'gl': true}
++    sources += files('video/out/opengl/context_sdl.c')
++endif
++
+ plain_gl = get_option('plain-gl').require(
+     gl_allowed,
+     error_message: 'gl was not enabled!',
+diff --git a/meson.options b/meson.options
+index 52782f7..93b49f4 100644
+--- a/meson.options
++++ b/meson.options
+@@ -80,6 +80,7 @@ option('sdl2-video', type: 'feature', value: 'disabled', description: 'SDL2 vide
+ option('shaderc', type: 'feature', value: 'auto', description: 'libshaderc SPIR-V compiler')
+ option('sixel', type: 'feature', value:'auto', description: 'Sixel video output')
+ option('spirv-cross', type: 'feature', value: 'auto', description: 'SPIRV-Cross SPIR-V shader converter')
++option('gl-sdl', type: 'feature', value: 'disabled', description: 'OpenGL ES context on SDL2 (PortMaster handhelds)')
+ option('plain-gl', type: 'feature', value: 'auto', description: 'OpenGL without platform-specific code (e.g. for libmpv)')
+ option('vdpau', type: 'feature', value: 'auto', description: 'VDPAU acceleration')
+ option('vdpau-gl-x11', type: 'feature', value: 'auto', description: 'VDPAU with OpenGL/X11')
+diff --git a/video/out/gpu/context.c b/video/out/gpu/context.c
+index 60c0641..260fc56 100644
+--- a/video/out/gpu/context.c
++++ b/video/out/gpu/context.c
+@@ -35,6 +35,7 @@
+ 
+ /* OpenGL */
+ extern const struct ra_ctx_fns ra_ctx_glx;
++extern const struct ra_ctx_fns ra_ctx_sdl;
+ extern const struct ra_ctx_fns ra_ctx_x11_egl;
+ extern const struct ra_ctx_fns ra_ctx_drm_egl;
+ extern const struct ra_ctx_fns ra_ctx_wayland_egl;
+@@ -77,6 +78,9 @@ static const struct ra_ctx_fns ra_ctx_dummy = {
+ 
+ static const struct ra_ctx_fns *const contexts[] = {
+     &ra_ctx_dummy,
++#if HAVE_GL_SDL
++    &ra_ctx_sdl,
++#endif
+ // Direct3D contexts:
+ #if HAVE_D3D11
+     &ra_ctx_d3d11,

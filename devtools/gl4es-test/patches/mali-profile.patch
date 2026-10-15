@@ -1,0 +1,21 @@
+PC testing only: with LIBGL_NOTEST=1 and GL4ES_MALI_PROFILE=1, gl4es takes the capabilities its own hardware
+test reports on a Mali GPU (RK3566 Mali-G52; the H700's G31 reports the same set), so it takes the same code
+paths as on the handhelds instead of the paths for llvmpipe's much longer extension list.
+
+--- a/src/glx/hardext.c
++++ b/src/glx/hardext.c
+@@ -128,6 +128,14 @@ void GetHardwareExtensions(int notest)
+ #ifdef AMIGAOS4
+             hardext.glsl300es = 1;
+ #endif
++            if(getenv("GL4ES_MALI_PROFILE")) {
++                SHUT_LOGD("PC test: Mali hardware profile\n");
++                hardext.npot = 3; hardext.maxsize = 16383;
++                hardext.elementuint = 1; hardext.depthstencil = 1; hardext.depth24 = 1;
++                hardext.rgba8 = 1; hardext.depthtex = 1; hardext.stenciltex = 1;
++                hardext.highp = 1; hardext.derivatives = 1; hardext.blendminmax = 1;
++                hardext.maxcolorattach = 1; hardext.bgra8888 = 1; hardext.maxtex = 16; hardext.maxteximage = 16; hardext.maxvarying = 31; hardext.maxvattrib = 32;
++            }
+         }
+         return;
+     }

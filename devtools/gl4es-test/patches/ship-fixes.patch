@@ -1,0 +1,25 @@
+The two source fixes carried by the gl4es binary the ports ship (Ittle Dew, Teslagrad), so the
+test bed looks for bugs nobody has found yet. Applies to a744af14 (= Westonpack's v1.1.7) and master.
+
+--- a/src/gl/oldprogram.c
++++ b/src/gl/oldprogram.c
+@@ -62,7 +62,7 @@ void FreeOldProgramMap(glstate_t* glstate)
+ GLuint getUniqueProgramID(GLuint last) {
+     // avoid recycling prog id (that may messup FPE Cache)
+     static GLuint upper = 0;
+-    if(last>upper) last = upper;
++    if(last<upper) last = upper;
+     khint_t k;
+     do {
+         ++last;
+--- a/src/gl/pixel.c
++++ b/src/gl/pixel.c
+@@ -156,7 +156,7 @@ bool remap_pixel(const GLvoid *src, GLvoid *dst,
+         type_case(GL_BYTE, GLbyte, read_each(, / 128.0f,))
+         case GL_INT8_REV:
+         type_case(GL_UNSIGNED_BYTE, GLubyte, read_each(, / 255.0f,))
+-        type_case(GL_UNSIGNED_SHORT, GLubyte, read_each(, / 65535.0f,))
++        type_case(GL_UNSIGNED_SHORT, GLushort, read_each(, / 65535.0f,))
+         type_case(GL_INT8, GLubyte, read_each(max_a - , / 255.0f,))
+         type_case(GL_UNSIGNED_SHORT_5_6_5_REV, GLushort,
+             s = (const GLushort[]) {

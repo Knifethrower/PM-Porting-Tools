@@ -1,0 +1,5 @@
+context_sdl.c and gl-sdl.patch are changes to mpv (https://github.com/mpv-player/mpv) and are released
+under mpv's licence for new code: GNU Lesser General Public License, version 2.1 or later
+(https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html; the full text is LICENSE.LGPL in the mpv sources).
+
+build_libmpv.sh and README.md are 0BSD like the rest of this repository.

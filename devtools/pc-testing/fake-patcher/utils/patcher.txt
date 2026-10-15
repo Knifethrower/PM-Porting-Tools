@@ -1,0 +1,4 @@
+# fake PortMaster patcher: like patch_thread.lua, run PATCHER_FILE via popen, show stdout, ignore the exit code
+echo "[patcher] $PATCHER_GAME ($PATCHER_TIME)"
+"$PATCHER_FILE" | while IFS= read -r l; do echo "[GUI] $l"; done
+echo "[GUI] Patching completed successfully!"
