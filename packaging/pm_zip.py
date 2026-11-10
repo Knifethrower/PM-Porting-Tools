@@ -4,13 +4,14 @@
 Release folder (the layout all the author's ports use):
   <release>/<Port Name>.sh          the launcher (exactly one .sh at the top)
   <release>/port.json, README.md, gameinfo.xml, screenshot.png, cover.png
-                                    (whichever exist; they go into the port folder in the zip;
-                                    testing_thread.txt stays out: it is the Discord post, not port content)
+                                    (whichever exist; at the top of the zip, also when they are in the port folder;
+                                    testing_thread.txt never goes in: it is the Discord post, not port content)
   <release>/<portdir>/              the port folder (exactly one folder at the top, or --portdir)
 
 Zip layout (what PortMaster installs from its autoinstall folder):
-  <Port Name>.sh
-  <portdir>/...                     port files plus the metadata files above
+  <Port Name>.sh, port.json, README.md, gameinfo.xml, screenshot.png, cover.png
+                                    (harbourmaster puts the metadata files into the port folder when it installs)
+  <portdir>/...                     the port's files
 
 Permissions: 0755 for the launcher, ELF files, files that start with '#!' and *.so / *.so.N;
 0644 for everything else (no exec list to keep up to date). Text files (by extension, plus '#!'
@@ -97,10 +98,12 @@ def main():
         add(z, os.path.join(rel, launchers[0]), launchers[0], a.keep_crlf)
         for m in META:
             if os.path.exists(os.path.join(rel, m)):
-                add(z, os.path.join(rel, m), f'{portdir}/{m}', a.keep_crlf)
+                add(z, os.path.join(rel, m), m, a.keep_crlf)
         for p, r in walk(os.path.join(rel, portdir)):
+            if os.path.basename(r) == 'testing_thread.txt' or (r in META and os.path.exists(os.path.join(rel, r))):
+                continue
             if not any(fnmatch.fnmatch(f'{portdir}/{r}', g) for g in a.skip):
-                add(z, p, f'{portdir}/{r}', a.keep_crlf)
+                add(z, p, r if r in META else f'{portdir}/{r}', a.keep_crlf)
         if a.gamedata:                            # personal build: prepared game data included
             for p, r in walk(a.gamedata):
                 add_stream(z, p, f'{portdir}/gamedata/{r}')

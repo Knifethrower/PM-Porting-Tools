@@ -10,7 +10,9 @@ usage: pm_lint.py <release dir | port zip>
   release dir: <Port Name>.sh, port.json, README.md, gameinfo.xml, screenshot.png at the top, plus
                one port folder (the layout pm_zip.py packs). A zip made by pm_zip.py works too:
                it is unpacked to a temp folder and the metadata is looked up in the port folder.
-Exit status 1 when any ERROR is found; WARN lines are things a reviewer will probably ask about.
+Exit status 1 when any ERROR is found; WARN lines are things a reviewer will probably ask about, INFO lines
+are style. Also checks what PortMaster's checker bot (pmcheck) reports: min_glibc against the binaries' own
+glibc needs, a 640x480 screenshot, images of 100 KB at most, SDL driver defaults, long comment blocks.
 """
 import json, os, re, struct, sys, tempfile, zipfile
 
@@ -39,10 +41,13 @@ BANNED = (('SDL_VIDEODRIVER=', 'never force a video driver in the launcher'),
           ('"$GPTOKEYB2"', 'do not quote $GPTOKEYB2 (it can carry an env prefix)'),
           ('"$GPTOKEYB"', 'do not quote $GPTOKEYB (it can carry an env prefix)'))
 TEXT = ('.sh', '.ini', '.json', '.cfg', '.py')          # port scripts and configs (game data is left alone)
+GLIBC_FLOOR = (2, 30)                                   # the oldest firmwares' glibc: needing more must be declared
+IMAGE_KB = 100
 
-errors, warns = [], []
+errors, warns, notes = [], [], []
 err = errors.append
 warn = warns.append
+note = notes.append
 
 
 def read(path):
@@ -56,7 +61,59 @@ def png_size(path):
     return struct.unpack('>II', head[16:24])
 
 
-def lint(rel):
+def glibc_needed(path):
+    """The newest GLIBC_x.y an ELF file's symbol versions ask for, as a tuple; None if not an ELF or it asks for none."""
+    with open(path, 'rb') as f:
+        if f.read(4) != b'\x7fELF':
+            return None
+        d = b'\x7fELF' + f.read()
+    is64, end = d[4] == 2, '<' if d[5] == 1 else '>'
+    u32 = lambda o: struct.unpack_from(end + 'I', d, o)[0]
+    u16 = lambda o: struct.unpack_from(end + 'H', d, o)[0]
+    best = None
+    try:
+        shoff = struct.unpack_from(end + 'Q', d, 0x28)[0] if is64 else u32(0x20)
+        entsize, count = (u16(0x3A), u16(0x3C)) if is64 else (u16(0x2E), u16(0x30))
+        off, size, link, info = (24, 32, 40, 44) if is64 else (16, 20, 24, 28)
+        word = (lambda o: struct.unpack_from(end + 'Q', d, o)[0]) if is64 else u32
+        for s in (shoff + i * entsize for i in range(count)):
+            if u32(s + 4) != 0x6ffffffe:                    # SHT_GNU_verneed
+                continue
+            strs = word(shoff + u32(s + link) * entsize + off)
+            need = word(s + off)
+            for _ in range(u32(s + info)):
+                aux = need + u32(need + 8)
+                for _ in range(u16(need + 2)):
+                    name = d[strs + u32(aux + 8):d.index(b'\0', strs + u32(aux + 8))]
+                    m = re.fullmatch(rb'GLIBC_(\d+(?:\.\d+)+)', name)
+                    if m:
+                        v = tuple(int(x) for x in m.group(1).split(b'.'))
+                        best = max(best, v) if best else v
+                    if not u32(aux + 12):
+                        break
+                    aux += u32(aux + 12)
+                if not u32(need + 12):
+                    break
+                need += u32(need + 12)
+    except (struct.error, ValueError, IndexError):
+        return best
+    return best
+
+
+def newest_glibc(rel):
+    """(version tuple, relative path) of the file in the release that needs the newest glibc, or (None, None)."""
+    best, who = None, None
+    for root, ds, fs in os.walk(rel):
+        ds[:] = [d for d in ds if d != 'gamedata']
+        for f in sorted(fs):
+            p = os.path.join(root, f)
+            v = glibc_needed(p) if os.path.isfile(p) and not os.path.islink(p) else None
+            if v and (not best or v > best):
+                best, who = v, os.path.relpath(p, rel).replace(os.sep, '/')
+    return best, who
+
+
+def lint(rel, is_zip=False):
     top = sorted(os.listdir(rel))
     launchers = [f for f in top if f.endswith('.sh') and os.path.isfile(os.path.join(rel, f))]
     dirs = [d for d in top if os.path.isdir(os.path.join(rel, d))]
@@ -69,7 +126,7 @@ def lint(rel):
     sh, portdir = launchers[0], dirs[0]
     P = os.path.join(rel, portdir)
 
-    def meta(name):                       # release folder: at the top; pm_zip.py zip: in the port folder
+    def meta(name):                       # at the top (release folder, pm_zip.py zip); older zips: in the port folder
         for p in (os.path.join(rel, name), os.path.join(P, name)):
             if os.path.isfile(p):
                 return p
@@ -81,7 +138,10 @@ def lint(rel):
             err('missing ' + name)
     if not meta('cover.png'):
         warn('no cover.png (optional, but expected for a real submission)')
-    if not meta('testing_thread.txt'):
+    if is_zip:
+        if any('testing_thread.txt' in fs for _, _, fs in os.walk(rel)):
+            err('testing_thread.txt is in the zip: it is the Discord post, it stays out of zips')
+    elif not meta('testing_thread.txt'):
         warn('no testing_thread.txt (the Discord testing-thread post)')
 
     # ---- naming and layout ----
@@ -93,6 +153,10 @@ def lint(rel):
     gptk = [os.path.relpath(os.path.join(r, f), rel) for r, _, fs in os.walk(P) for f in fs if f.endswith('.gptk')]
     if gptk:
         warn(f'classic .gptk file(s) {gptk}: new ports use a gptokeyb2 .ini')
+    nested = [os.path.relpath(os.path.join(r, f), rel) for r, _, fs in os.walk(P) for f in fs if f.endswith('.sh')]
+    if nested:
+        warn(f'.sh file(s) inside the port folder {nested}: harbourmaster warns on install ("can cause issues"); '
+             'ship helper/build scripts without the extension')
 
     # ---- every text file: LF endings; generated content: no em dashes ----
     generated = [os.path.join(rel, sh)] + [m for m in map(meta, ('port.json', 'README.md', 'gameinfo.xml', 'testing_thread.txt')) if m]
@@ -117,9 +181,19 @@ def lint(rel):
             if pat in line and not line.lstrip().startswith('#'):
                 if 'SDL_VIDEODRIVER=sdl2' in line:   # SDL3-on-SDL2 backend selector, not a device driver
                     warn(f'launcher sets SDL_VIDEODRIVER=sdl2: fine only for SDL3 on the SDL2 backend: {line.strip()}')
+                elif re.search(r'SDL_(VIDEO|AUDIO)DRIVER=\$\{SDL_(VIDEO|AUDIO)DRIVER:-', line):
+                    warn(f'launcher sets an SDL driver default (SDL would pick the backend itself): drop it unless a device needs it, and say which in a short comment: {line.strip()}')
                 else:
                     err(f'launcher: {why}: {line.strip()}')
                 break
+    run = start = 0
+    for n, line in enumerate(s.splitlines() + [''], 1):
+        if line.lstrip().startswith('#') and not line.startswith(('#!', '# PORTMASTER:')):
+            run, start = run + 1, start if run else n
+            continue
+        if run >= 3:
+            note(f'{sh}:{start}: comment block of {run} lines; keep comments to one short line per fix')
+        run = 0
     if '$GPTOKEYB2' not in s:
         warn('launcher does not use $GPTOKEYB2 (new ports use gptokeyb2)')
     if 'pm_finish' not in s:
@@ -159,6 +233,15 @@ def lint(rel):
                 err(f'port.json {k} must be plain single-paragraph text (markdown goes in {k}_md)')
         if attr.get('title') and attr['title'] + '.sh' != sh:
             warn(f'port.json title "{attr["title"]}" does not match the launcher name "{sh}"')
+        need, who = newest_glibc(rel)
+        declared = (attr.get('min_glibc') or '').strip()
+        if need:
+            v = '.'.join(map(str, need))
+            if not re.fullmatch(r'\d+(\.\d+)+', declared):
+                if need > GLIBC_FLOOR:
+                    err(f'port.json min_glibc is {declared!r} but {who} needs GLIBC_{v}: set "min_glibc": "{v}"')
+            elif tuple(int(x) for x in declared.split('.')) < need:
+                err(f'port.json min_glibc is "{declared}" but {who} needs GLIBC_{v}')
 
     # ---- README ----
     if meta('README.md'):
@@ -200,10 +283,11 @@ def lint(rel):
             size = png_size(p)
             if not size:
                 err(img + ' is not a PNG')
-            elif img == 'screenshot.png':
-                w, h = size
-                if w < 640 or h < 480 or abs(w / h - 4 / 3) > 0.01:
-                    err(f'screenshot.png must be 4:3 and at least 640x480 (is {w}x{h})')
+            elif img == 'screenshot.png' and size != (640, 480):
+                err(f'screenshot.png must be 640x480 (is {size[0]}x{size[1]})')
+            kb = os.path.getsize(p) / 1024
+            if kb > IMAGE_KB:
+                warn(f'{img} is {kb:.0f} KB (limit {IMAGE_KB} KB): compress it')
 
 
 def main():
@@ -213,14 +297,16 @@ def main():
     if zipfile.is_zipfile(target):
         with tempfile.TemporaryDirectory() as t:
             zipfile.ZipFile(target).extractall(t)
-            lint(t)
+            lint(t, is_zip=True)
     else:
         lint(target)
     for w in warns:
         print('WARN  ' + w)
     for e in errors:
         print('ERROR ' + e)
-    print(f'{len(errors)} errors, {len(warns)} warnings')
+    for n in notes:
+        print('INFO  ' + n)
+    print(f'{len(errors)} errors, {len(warns)} warnings, {len(notes)} notes')
     sys.exit(1 if errors else 0)
 
 
